@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Даты продажи товара{% endblock %}
+
+{% block content %}
+    {% for date in sales_dates %}
+    <p>{{ date.sale_date }}</p>
+    <br><br>
+    {% endfor %}
+    <p> Продан {{ len(sales_dates) }} раз </p>
+{% endblock %}

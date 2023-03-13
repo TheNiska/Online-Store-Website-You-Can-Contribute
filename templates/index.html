@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Категории товаров{% endblock %}
+
+{% block content %}
+      <div class="categories-wrapper">
+      {% for category in categories %}
+        <a class="cat_link" href="/manufacturers/{{ category.id }} ">
+        <div class="categories-images">
+            <img class="category-icon" src="{{ url_for('static', filename='images/icons/' + category.name_eng + '.svg') }}" alt="Category icon">
+            <p class="crg_name">{{category.name}}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <form class="adding-category" method="POST" action="/add_category">
+      <label for="name">Название:</label>
+      <input type="text" name="name" required>
+      <button type="submit">Добавить</button>
+    </form>
+
+     
+    <canvas id="salesChart"></canvas>
+
+  <script>
+  // Получаем данные, переданные в шаблоне
+  const salesDict = {{ data_dict | tojson }};
+  
+  const salesData = {
+    labels: Object.keys(salesDict),
+    datasets: []
+  };
+
+  for (let product of Object.values(salesDict)) {
+    for (let [i, [name, code, price]] of product.entries()) {
+      if (i >= salesData.datasets.length) {
+        salesData.datasets.push({
+          label: `${name} ${code}`,
+          data: new Array(salesData.labels.length).fill(0),
+          backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`,
+          borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
+          borderWidth: 1
+        });
+      }
+
+      salesData.datasets[i].data[salesData.labels.indexOf(Object.keys(salesDict)[i])] = price;
+    }
+  }
+
+  const salesChart = new Chart(document.getElementById('salesChart'), {
+    type: 'bar',
+    data: salesData,
+    options: {
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(tooltipItem) {
+              const dayIndex = tooltipItem.dataIndex;
+              const productIndex = tooltipItem.datasetIndex;
+              const dayData = salesDict[Object.keys(salesDict)[dayIndex]];
+              const product = dayData && dayData[productIndex];
+              return product && `стоимость: ${product[2]}`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+
+
+    
+  
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Результаты поиска по запросу "{{ search_term }}"</h1>
+
+  {% if results|length > 0 %}
+    <table class="products_table">
+    <thead>
+      <tr>
+        <th data-type="string">Название</th>
+        <th data-type="string">Артикул</th>
+        <th data-type="string">Описание</th>
+        <th data-type="number">Цена</th>
+        <th>Количество</th>
+        <th>Дата цены</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in results %}
+      <tr>
+        <td>{{ product.name }}</td>
+        <td>{{ product.sku }}</td>
+        <td class="products_descr">{{ product.description }}</td>
+        <td class="products_price">{{ product.price }} &#8381;</td>
+        <td><span class="product_quantity">{{ product.quantity }}</span></td>
+        <td>{{ product.last_updated.strftime('%Y-%m-%d %H:%M')}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+  {% else %}
+    <p>Ничего не найдено</p>
+  {% endif %}
+
+     <script>
+    const table = document.querySelector('table');
+    const headers = table.querySelectorAll('th');
+
+    let sortDirection = 1;
+
+    headers.forEach(header => {
+        header.addEventListener('click', () => {
+            const type = header.dataset.type;
+            const index = header.cellIndex;
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+            sortDirection *= -1; // Reverse the sort direction
+
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.cells[index].textContent;
+                const cellB = rowB.cells[index].textContent;
+
+                if (type === 'number') {
+                    return sortDirection * (parseFloat(cellA) - parseFloat(cellB));
+                } else {
+                    return sortDirection * cellA.localeCompare(cellB);
+                }
+            });
+
+            // Reorder the rows based on the sorted array
+            rows.forEach(row => table.querySelector('tbody').appendChild(row));
+
+            // Reset all headers' classes to default
+            headers.forEach(header => header.classList.remove('sorted-asc', 'sorted-desc'));
+
+            // Set the class for the current header based on the sort direction
+            if (sortDirection === 1) {
+              header.classList.add('sorted-asc');
+            } else {
+              header.classList.add('sorted-desc');
+            }
+        });
+    });
+</script>
+
+
+{% endblock %}

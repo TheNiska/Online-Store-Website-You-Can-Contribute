@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Поиск и изменение товара</title>
+  </head>
+  <body>
+    <h1>Поиск и изменение товара</h1>
+
+
+    <form method="POST" action="{{ url_for('amount_change') }}">
+      <input type="hidden" name="form_id" value="search_form">
+      <label for="sku">Артикул товара:</label>
+      <input type="text" id="sku" name="sku" required>
+      <button type="submit">Найти</button>
+    </form>
+    <br>
+
+
+    {% if product %}
+    <form method="POST" action="{{ url_for('amount_change') }}">
+    <input type="hidden" name="form_id" value="change_form">
+    <h2>Информация о товаре</h2>
+    <p>Артикул: {{ product.sku }}</p>
+    <p>Наименование: {{ product.name }}</p>
+    <p>Количество: {{ product.quantity }}</p>
+    <label for="quantity">Изменить количество:</label>
+    <input type="number" id="quantity" name="quantity" value="{{ product.quantity }}" required>
+    <input type="hidden" name="sku" value="{{ product.sku }}">
+    <button type="submit">Сохранить</button>
+    </form>
+    {% endif %}
+
+
+    <br>
+    <h2>{{ message }}</h2>
+  </body>
+</html>

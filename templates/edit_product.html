@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Редактирование информации от товаре</h1>
+  <form method="POST" action="/update_product/{{ product.id }}" class="edit-product-form">
+    <input type="hidden" name="category_name" value="{{ category_name }}">
+    <div class="form-group">
+      <label for="name">Название</label>
+      <input type="text" class="form-control" id="name" name="name" value="{{ product.name }}" required>
+    </div>
+    <div class="form-group">
+      <label for="sku">Артикул</label>
+      <input type="text" class="form-control" id="sku" name="sku" value="{{ product.sku }}" required>
+    </div>
+    <div class="form-group">
+      <label for="description">Описание</label>
+      <textarea class="form-control" id="description" name="description" rows="3" required>{{ product.description }}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="price">Цена (RUB)</label>
+      <input type="number" class="form-control" id="price" name="price" value="{{ product.price }}" required>
+    </div>
+    <input type="hidden" name="old_price" value="{{ product.price }}">
+    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+  </form>
+{% endblock %}
