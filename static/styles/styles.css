@@ -445,8 +445,22 @@ form.adding-category button {
 }
 
 
-canvas {
-  width: 500px;
-  max-width: 1000px;
-  margin: 50px auto;
+.last_sales {
+  text-align: center;
+  border: thin solid blue;
+  max-width: 500px;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
+.last_sales span.prices {
+  font-size: 1.2em;
+  font-style: italic;
+}
+
+
+.travolta {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
 }

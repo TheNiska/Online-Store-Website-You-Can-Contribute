@@ -29,7 +29,11 @@
   </tbody>
   </table>
   {% else %}
-    <p>Ничего не найдено</p>
+    <p style="text-align: center;">Ничего не найдено</p>
+    <div class="travolta">
+      <img src="{{ url_for('static', filename='images/travolta.png') }}" alt="Travolta">
+    </div>
+
   {% endif %}
 
      <script>

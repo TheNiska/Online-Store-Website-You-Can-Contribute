@@ -123,8 +123,8 @@ def download_csv():
 def index():
     categories = Category.query.all()
 
-    # Определяем начало периода (за последние 7 дней)
-    start_date = datetime.now() - timedelta(days=7)
+    # Определяем начало периода (за последние 10 дней)
+    start_date = datetime.now() - timedelta(days=10)
 
     # Запрос на получение данных
     sales_data = db.session.query(
@@ -142,22 +142,27 @@ def index():
             Product.name,
             Product.sku,
             Product.price,
+            ProductSaleDate.sale_date,
+            ProductSaleDate.id
+        ).order_by(
             ProductSaleDate.sale_date
         ).all()
  
     data_dict = {}
      
     for el in sales_data:
-        if el[3].strftime('%d-%m-%y') not in data_dict:
-            data_dict[el[3].strftime('%d-%m-%y')] = []
+        date_str = el[3].strftime('%d-%m-%y')
+        if date_str not in data_dict:
+            data_dict[date_str] = []
 
-        data_dict[el[3].strftime('%d-%m-%y')].append((el[0], el[1], el[2]))
-
+        data_dict[date_str].append((el[0], el[1], el[2]))
+    '''
     for el in data_dict:
         print(el, ':', '\n')
         for i in range (len((data_dict[el]))):
             print(data_dict[el][i], ' ')
         print('--------------------------------')
+    '''
      
     sales_sum = {}
     for el in data_dict:

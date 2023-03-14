@@ -20,59 +20,21 @@
       <button type="submit">Добавить</button>
     </form>
 
-     
-    <canvas id="salesChart"></canvas>
+     <div class="last_sales">
+       {% for el in data_dict %}
+            <h3>{{ el }}</h3>
+            {% for info in data_dict[el] %}
+                <br>
+                <span>{{ info[0] }}</span>
+                <span>{{ info[1] }}</span>
+                <span class="prices">{{ info[2] }}</span>
+            {% endfor %}
+            <br>
+            <p>Сумма за день: {{ sales_sum[el] }}</p>
+            <hr>
+        {% endfor %}
+      </div>
 
-  <script>
-  // Получаем данные, переданные в шаблоне
-  const salesDict = {{ data_dict | tojson }};
-  
-  const salesData = {
-    labels: Object.keys(salesDict),
-    datasets: []
-  };
-
-  for (let product of Object.values(salesDict)) {
-    for (let [i, [name, code, price]] of product.entries()) {
-      if (i >= salesData.datasets.length) {
-        salesData.datasets.push({
-          label: `${name} ${code}`,
-          data: new Array(salesData.labels.length).fill(0),
-          backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`,
-          borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
-          borderWidth: 1
-        });
-      }
-
-      salesData.datasets[i].data[salesData.labels.indexOf(Object.keys(salesDict)[i])] = price;
-    }
-  }
-
-  const salesChart = new Chart(document.getElementById('salesChart'), {
-    type: 'bar',
-    data: salesData,
-    options: {
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: function(tooltipItem) {
-              const dayIndex = tooltipItem.dataIndex;
-              const productIndex = tooltipItem.datasetIndex;
-              const dayData = salesDict[Object.keys(salesDict)[dayIndex]];
-              const product = dayData && dayData[productIndex];
-              return product && `стоимость: ${product[2]}`;
-            }
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-</script>
 
 
 

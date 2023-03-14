@@ -2,10 +2,10 @@
 
 from flask import Flask, render_template, request, redirect, url_for, flash, make_response
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
 import pytz
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from bs4 import BeautifulSoup
 import csv
 
@@ -16,7 +16,6 @@ application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 application.secret_key = "Lmleo783L!sl"
 PASSWORD = "PFdmn1717"
 db = SQLAlchemy(application)
-
 tz = pytz.timezone('Europe/Moscow')
 
 
@@ -68,16 +67,24 @@ def get_table_data(html):
     table = soup.find('table')
 
     # Получаем заголовки
+    is_less_then_seven = False
     headers = table.find_all('th')
+
+    if len(headers) < 7:
+        is_less_then_seven = True
+
     header_data = [header.get_text() for header in headers]
-    del header_data[-1]
+
+    if not is_less_then_seven:
+         del header_data[-1]
 
     rows = table.find_all('tr')[1:] # пропустаем первую строку, иначе ошибка
     table_data = []
     for row in rows:
         cells = row.find_all('td')
         row_data = [cell.get_text() for cell in cells]
-        del row_data[6] # удаление 7-го столбца
+        if not is_less_then_seven:
+            del row_data[6] # удаление 7-го столбца
         row_data[4] = cells[4].find('span', class_='product_quantity').get_text() # извлечение данных из тега span в 5-м столбце
         table_data.append(row_data)
 
@@ -111,7 +118,58 @@ def download_csv():
 @application.route('/')
 def index():
     categories = Category.query.all()
-    return render_template('index.html', categories=categories)
+
+    # Определяем начало периода (за последние 10 дней)
+    start_date = datetime.now() - timedelta(days=10)
+
+    # Запрос на получение данных
+    sales_data = db.session.query(
+            Product.name,
+            Product.sku,
+            Product.price,
+            ProductSaleDate.sale_date,
+            db.func.sum(Product.price).label('daily_sales')
+        ).join(
+            ProductSaleDate,
+            Product.id == ProductSaleDate.product_id
+        ).filter(
+            ProductSaleDate.sale_date >= start_date
+        ).group_by(
+            Product.name,
+            Product.sku,
+            Product.price,
+            ProductSaleDate.sale_date,
+            ProductSaleDate.id
+        ).order_by(
+            ProductSaleDate.sale_date
+        ).all()
+ 
+    data_dict = {}
+     
+    for el in sales_data:
+        date_str = el[3].strftime('%d-%m-%y')
+        if date_str not in data_dict:
+            data_dict[date_str] = []
+
+        data_dict[date_str].append((el[0], el[1], el[2]))
+    '''
+    for el in data_dict:
+        print(el, ':', '\n')
+        for i in range (len((data_dict[el]))):
+            print(data_dict[el][i], ' ')
+        print('--------------------------------')
+    '''
+     
+    sales_sum = {}
+    for el in data_dict:
+        money_sum = 0
+        for i in range (len(data_dict[el])):
+            money_sum += data_dict[el][i][2]
+        sales_sum[el] = money_sum
+
+
+
+    return render_template('index.html', data_dict=data_dict, sales_sum=sales_sum, categories=categories)
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
@@ -135,26 +193,23 @@ def logout():
 @application.route('/search', methods=['POST'])
 def search():
     search_term = request.form['search_term'].lower()
-    results = Product.query.filter(or_(Product.name.ilike('%' + search_term + '%'),
-                                       Product.name.ilike('%' + search_term.capitalize() + '%'),
-                                       Product.name.ilike('%' + search_term.upper() + '%'),
-                                       Product.sku.ilike('%' + search_term + '%'),
-                                       Product.sku.ilike('%' + search_term.capitalize() + '%'),
-                                       Product.sku.ilike('%' + search_term.upper() + '%'),
-                                       Product.description.ilike('%' + search_term + '%'),
-                                       Product.description.ilike('%' + search_term.capitalize() + '%'),
-                                       Product.description.ilike('%' + search_term.upper() + '%'),
-                                      ))
+
+    if (len(search_term)) > 2 and (not search_term.isspace()):
+        results = Product.query.filter(or_(Product.name.ilike('%' + search_term + '%'),
+                                           Product.name.ilike('%' + search_term.capitalize() + '%'),
+                                           Product.name.ilike('%' + search_term.upper() + '%'),
+                                           Product.sku.ilike('%' + search_term + '%'),
+                                           Product.sku.ilike('%' + search_term.capitalize() + '%'),
+                                           Product.sku.ilike('%' + search_term.upper() + '%')
+                                          )).all()
+    else:
+        results = []
 
     return render_template('search_results.html', results=results, search_term=search_term)
 
 
 @application.route('/products/<int:manufacturer_id>/<string:category_name>')
 def products(manufacturer_id, category_name):
-    if request.method == 'POST':
-        form_id = request.form.get("form_id")
-        if form_id == "print_form":
-            html_table()
     manufacturer = Manufacturer.query.get(manufacturer_id)
     products = Product.query.filter_by(manufacturer_id=manufacturer_id).all()
     return render_template('products.html', manufacturer=manufacturer, products=products, category_name=category_name)
