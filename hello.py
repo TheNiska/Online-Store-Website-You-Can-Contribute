@@ -9,50 +9,15 @@ from sqlalchemy import or_, func
 from bs4 import BeautifulSoup
 import csv
 
-from flask_migrate import Migrate
-
-
 application = Flask(__name__)
 application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///store.db'
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 application.secret_key = "Lmleo783L!sl"
 PASSWORD = "PFdmn1717"
 db = SQLAlchemy(application)
-
-migrate = Migrate(application, db)
 tz = pytz.timezone('Europe/Moscow')
 
-
-class Category(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    name_eng = db.Column(db.String(100), nullable=True)
-    manufacturers = db.relationship('Manufacturer', backref='category', cascade='all, delete-orphan')
-
-class Manufacturer(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    products = db.relationship('Product', backref='manufacturer', cascade='all, delete-orphan')
-
-class Product(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    sku = db.Column(db.String(50), nullable=True)
-    description = db.Column(db.String(200))
-    price = db.Column(db.Float, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    last_updated = db.Column(db.DateTime, nullable=False)
-    color = db.Column(db.String(50), nullable=True)
-    fct_type = db.Column(db.String(20), nullable=True)
-    fct_fltr = db.Column(db.Boolean, nullable=True)
-    manufacturer_id = db.Column(db.Integer, db.ForeignKey('manufacturer.id', ondelete='CASCADE'), nullable=False)
-
-class ProductSaleDate(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
-    sale_date = db.Column(db.Date, nullable=False)
-
+from models import *
 
 
 # В этой функции мы проверяем авторизован ли пользователь перед заходом на любую страницу
@@ -156,13 +121,7 @@ def index():
             data_dict[date_str] = []
 
         data_dict[date_str].append((el[0], el[1], el[2]))
-    '''
-    for el in data_dict:
-        print(el, ':', '\n')
-        for i in range (len((data_dict[el]))):
-            print(data_dict[el][i], ' ')
-        print('--------------------------------')
-    '''
+
      
     sales_sum = {}
     for el in data_dict:
@@ -170,8 +129,6 @@ def index():
         for i in range (len(data_dict[el])):
             money_sum += data_dict[el][i][2]
         sales_sum[el] = money_sum
-
-
 
     return render_template('index.html', data_dict=data_dict, sales_sum=sales_sum, categories=categories)
 
@@ -402,4 +359,4 @@ def create_tables():
     db.create_all()
 
 if __name__ == "__main__":
-   application.run(debug=True, host='0.0.0.0')
+   application.run(host='0.0.0.0')

@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
+{% block title %}Результаты{% endblock %}
+
 {% block content %}
-  <h1>Результаты поиска по запросу "{{ search_term }}"</h1>
+  <h1>Результаты поиска по запросу "{{ search_term }}"<button id="download-csv"><i class="fas fa-download"></i></button></h1>
 
   {% if results|length > 0 %}
     <table class="products_table">
