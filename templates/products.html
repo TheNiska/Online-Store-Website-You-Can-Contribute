@@ -28,7 +28,7 @@
       {% if product.quantity != 0 %}
       <tr>
         <td>{{ product.name }}</td>
-        <td>{{ product.sku }}</td>
+        <td class="sku">{{ product.sku }}</td>
         <td class="products_descr">{{ product.description }}</td>
         {% if category_name == "mixers" %}
         <td>{{ product.fct_type }}</td>

@@ -22,7 +22,7 @@
       {% for product in results %}
       <tr>
         <td>{{ product.name }}</td>
-        <td>{{ product.sku }}</td>
+        <td class="sku">{{ product.sku }}</td>
         <td class="products_descr">{{ product.description }}</td>
         <td class="products_price">{{ product.price }} &#8381;</td>
         <td><span class="product_quantity">{{ product.quantity }}</span></td>

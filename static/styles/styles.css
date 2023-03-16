@@ -210,6 +210,12 @@ tr:hover {
   color: #000000;
 }
 
+tbody td:first-letter {
+  text-transform: capitalize;
+}
+tbody td.sku {
+  text-transform: uppercase;
+}
 th, td {
   border: none;
   padding: 0.5em;

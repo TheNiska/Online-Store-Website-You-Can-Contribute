@@ -5,7 +5,7 @@ from functools import wraps
 from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
 import pytz
-from sqlalchemy import or_, and_, func, text
+from sqlalchemy import or_, and_, func
 from bs4 import BeautifulSoup
 import csv
 
