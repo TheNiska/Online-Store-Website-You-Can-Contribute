@@ -131,7 +131,9 @@ def index():
 
     # Сохраняем изменения в базе данных
     db.session.commit()
+    
     '''
+    
 
     # Определяем начало периода (за последние 10 дней)
     start_date = datetime.now() - timedelta(days=10)
@@ -401,4 +403,4 @@ def create_tables():
 
 
 if __name__ == "__main__":
-   application.run(host='0.0.0.0', debug="True")
+   application.run(host='0.0.0.0')

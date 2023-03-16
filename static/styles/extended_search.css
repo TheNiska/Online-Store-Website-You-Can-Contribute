@@ -1,0 +1,67 @@
+.extended-search {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 1000px;
+    border: 2px solid #1d2a57;
+    border-radius: 20px;
+    padding: 1em;
+    margin-top: 50px;
+}
+
+.select-form {
+    position: relative;
+    height: 30px;
+    min-width: 500px;
+    text-align: justify;
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
+}
+
+.select-form label {
+    position: absolute;
+    left: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+
+}
+
+.select-form select {
+    position: absolute;
+    right: 0px;
+    top: 50%;
+    width: 65%;
+    transform: translateY(-50%);
+    padding: 7px;
+    border: 1px solid #aaa;
+    border-radius: 10px;
+    font-size: 1em;
+    outline: none;
+}
+
+.select-form input {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    outline: none;
+    width: 65%;
+    padding: 7px;
+    border: 1px solid #aaa;
+    border-radius: 10px;
+    font-size: 1em;
+
+}
+
+.extended-search button {
+    display: block;
+    margin: 10px auto;
+    width: 100px;
+}
+
+hr {
+    width: 80%;
+}

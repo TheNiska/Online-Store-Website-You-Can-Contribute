@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/extended_search.css') }}">
+{% endblock %}
+
 {% block title %}Profinters - магазин сантехники{% endblock %}
 
 {% block content %}
@@ -14,36 +18,42 @@
       {% endfor %}
     </div>
 
-    <form action="{{ url_for('search') }}" method="POST">
-      <input type="hidden" name="form_id" value="extended-search">
-      <div>
-        <label for="category">Категория:</label>
-        <select id="category" name="category">
-          <option value="">Все категории</option>
-          {% for category in categories %}
-            <option value="{{ category.id }}">{{ category.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div>
-        <label for="manufacturer">Производитель:</label>
-        <select id="manufacturer" name="manufacturer">
-          <option value="">Все производители</option>
-          {% for manufacturer in manufacturers_set %}
-            <option value="{{ manufacturer }}">{{ manufacturer }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div>
-        <label for="name_term">В названии:</label>
-        <input type="text" id="name_term" name="name_term">
-      </div>
-      <div>
-        <label for="descr_term">В описании:</label>
-        <input type="text" id="descr_term" name="descr_term">
-      </div>
-      <button type="submit">Искать</button>
-     </form>
+
+    <div class="extended-search">
+        <h2>Расширенный поиск</h2>
+        <form action="{{ url_for('search') }}" method="POST">
+          <input type="hidden" name="form_id" value="extended-search">
+          <div class="select-form">
+            <label for="category">Категория:</label>
+            <select id="category" name="category">
+              <option value="">Все категории</option>
+              {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="select-form">
+            <label for="manufacturer">Производитель:</label>
+            <select id="manufacturer" name="manufacturer">
+              <option value="">Все производители</option>
+              {% for manufacturer in manufacturers_set %}
+                <option value="{{ manufacturer }}">{{ manufacturer }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <hr>
+          <div class="select-form">
+            <label for="name_term">В названии:</label>
+            <input type="text" id="name_term" name="name_term" placeholder="слово в названии">
+          </div>
+          <div class="select-form">
+            <label for="descr_term">В описании:</label>
+            <input type="text" id="descr_term" name="descr_term" placeholder="слово в описании">
+          </div>
+          <hr>
+          <button type="submit">Искать</button>
+        </form>
+    </div>
 
      <div class="last_sales">
        {% for el in data_dict %}
