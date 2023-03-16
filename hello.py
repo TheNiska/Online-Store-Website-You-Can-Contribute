@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask, render_template, request, redirect, url_for, flash, make_response
+from flask import Flask, render_template, request, redirect, url_for, flash, make_response, current_app
 from functools import wraps
 from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
 import pytz
-from sqlalchemy import or_, func
+from sqlalchemy import or_, and_, func, text
 from bs4 import BeautifulSoup
 import csv
 
@@ -19,11 +19,39 @@ tz = pytz.timezone('Europe/Moscow')
 
 from models import *
 
+def global_lowering(product):
+    if product.name:
+        name = product.name
+        name = name.lower()
+        product.name = name
+
+    if product.sku:
+        sku = product.sku
+        sku = sku.lower()
+        product.sku = sku
+
+    if product.description:
+        descr = product.description
+        descr = descr.lower()
+        product.description = descr
+
+    if product.color:
+        color = product.color
+        color = color.lower()
+        product.color = color
+
+    if product.fct_type:
+        fct_type = product.fct_type
+        fct_type = fct_type.lower()
+        product.fct_type = fct_type
+
+    return 0
+
 
 # В этой функции мы проверяем авторизован ли пользователь перед заходом на любую страницу
 @application.before_request
 def check_auth():
-    if not request.cookies.get('auth') and request.endpoint != 'login':
+    if not request.cookies.get('auth') and request.endpoint != 'login' and not request.path.startswith(current_app.static_url_path):
         return redirect(url_for('login'))
 
 def check_password(password):
@@ -84,9 +112,26 @@ def download_csv():
 
 
 
-@application.route('/')
+@application.route('/', methods=['GET', 'POST'])
 def index():
     categories = Category.query.all()
+    manufacturers = Manufacturer.query.all()
+    manufacturers_set = set()
+    for manufacturer in manufacturers:
+        manufacturers_set.add(manufacturer.name)
+
+
+    '''
+    # Получаем все элементы таблицы Product
+    products = Product.query.all()
+
+    # Применяем функцию global_lowering к каждому элементу
+    for product in products:
+        global_lowering(product)
+
+    # Сохраняем изменения в базе данных
+    db.session.commit()
+    '''
 
     # Определяем начало периода (за последние 10 дней)
     start_date = datetime.now() - timedelta(days=10)
@@ -114,7 +159,6 @@ def index():
         ).all()
  
     data_dict = {}
-     
     for el in sales_data:
         date_str = el[3].strftime('%d-%m-%y')
         if date_str not in data_dict:
@@ -130,7 +174,8 @@ def index():
             money_sum += data_dict[el][i][2]
         sales_sum[el] = money_sum
 
-    return render_template('index.html', data_dict=data_dict, sales_sum=sales_sum, categories=categories)
+    return render_template('index.html', data_dict=data_dict, sales_sum=sales_sum, 
+                            categories=categories, manufacturers_set=manufacturers_set)
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
@@ -153,26 +198,49 @@ def logout():
 
 @application.route('/search', methods=['POST'])
 def search():
-    search_term = request.form['search_term'].lower()
+    form_id = request.form.get("form_id")
+    print('Идентификатор формы: ', form_id, '\n')
+    results = []
+    search_term = ""
+    results_length = 0
 
-    if (len(search_term)) > 2 and (not search_term.isspace()):
-        results = Product.query.filter(or_(Product.name.ilike('%' + search_term + '%'),
-                                           Product.name.ilike('%' + search_term.capitalize() + '%'),
-                                           Product.name.ilike('%' + search_term.upper() + '%'),
-                                           Product.sku.ilike('%' + search_term + '%'),
-                                           Product.sku.ilike('%' + search_term.capitalize() + '%'),
-                                           Product.sku.ilike('%' + search_term.upper() + '%')
-                                          )).all()
-    else:
-        results = []
+    if form_id == "nav-search":
+        search_term = request.form['search_term'].lower()
+        if (len(search_term)) > 2 and (not search_term.isspace()):
+            results = Product.query.filter(or_(Product.name.like('%' + search_term + '%'),
+                                               Product.sku.like('%' + search_term + '%')),
+                                               Product.quantity > 0
+                                           ).all()
+            results_length = len(results)
+        else:
+            results = []
 
-    return render_template('search_results.html', results=results, search_term=search_term)
+    elif form_id == "extended-search":
+        category_id = request.form["category"]
+        manufacturer_name = request.form["manufacturer"]
+        name_term = request.form["name_term"].lower()
+        descr_term = request.form["descr_term"].lower()
+
+        products = Product.query.join(Manufacturer).join(Category).\
+                   filter(or_(Category.id == category_id, not category_id)).\
+                   filter(or_(Manufacturer.name == manufacturer_name, not manufacturer_name)).\
+                   filter(and_(Product.quantity > 0,
+                               Product.name.like(f'%{name_term}%'),
+                               Product.description.like(f'%{descr_term}%'))).all()
+        search_term = name_term + " " + descr_term
+        results = products
+        results_length = len(results)
+
+
+
+    return render_template('search_results.html', results=results, search_term=search_term, 
+                            results_length=results_length)
 
 
 @application.route('/products/<int:manufacturer_id>/<string:category_name>')
 def products(manufacturer_id, category_name):
     manufacturer = Manufacturer.query.get(manufacturer_id)
-    products = Product.query.filter_by(manufacturer_id=manufacturer_id).all()
+    products = Product.query.filter_by(manufacturer_id=manufacturer_id).filter(Product.quantity > 0).all()
     return render_template('products.html', manufacturer=manufacturer, products=products, category_name=category_name)
 
 @application.route('/edit_product/<int:product_id>', methods=['GET', 'POST'])
@@ -180,47 +248,34 @@ def edit_product(product_id):
     category_name = request.args.get('category_name')
     product = Product.query.filter_by(id=product_id).first_or_404()
     if request.method == 'POST':
-        product.name = request.form['name']
-        product.sku = request.form['sku']
-        product.description = request.form['description']
-        product.price = request.form['price']
+        category_name = request.form['category_name']
+        old_price = float(request.form['old_price'])
+        product.name = request.form['name'].lower()
+        product.sku = request.form['sku'].lower()
+        product.description = request.form['description'].lower()
+        product.price = float(request.form['price'])
+        if product.price != old_price:
+            product.last_updated = datetime.now(tz)
         db.session.commit()
         flash('Product updated successfully!', 'success')
         return redirect(url_for('products', manufacturer_id=product.manufacturer_id, category_name=category_name ))
     else:
         return render_template('edit_product.html', product=product, category_name=category_name)
 
-@application.route('/update_product/<int:product_id>', methods=['GET', 'POST'])
-def update_product(product_id):
-    product = Product.query.filter_by(id=product_id).first_or_404()
-    if request.method == 'POST':
-        category_name = request.form['category_name']
-        old_price = float(request.form['old_price'])
-        product.name = request.form['name']
-        product.sku = request.form['sku']
-        product.description = request.form['description']
-        product.price = float(request.form['price'])
-        if product.price != old_price:
-            product.last_updated = datetime.now(tz)
-        db.session.commit()
-        flash('Product updated successfully!', 'success')
-        return redirect(url_for('products', manufacturer_id=product.manufacturer_id, category_name=category_name))
-    else:
-        return render_template('edit_product.html', product=product, category_name=category_name)
 
 @application.route('/add_product/<int:manufacturer_id>', methods=['POST'])
 def add_product(manufacturer_id):
     category_name = request.form['category_name']
-    name = request.form['name']
-    sku = request.form['sku']
-    description = request.form['description']
+    name = request.form['name'].lower()
+    sku = request.form['sku'].lower()
+    description = request.form['description'].lower()
     price = request.form['price']
     quantity = request.form['quantity']
     last_updated = datetime.now(tz)
 
     if category_name == "mixers":
-        color = request.form['color']
-        fct_type = request.form['fct_type']
+        color = request.form['color'].lower()
+        fct_type = request.form['fct_type'].lower()
         
         if 'fct_fltr' in request.form:
             fct_fltr_checked = request.form['fct_fltr']
@@ -307,21 +362,6 @@ def delete_manufacturer(id):
     return redirect(url_for('manufacturers', category_id=category_id))
 
 
-@application.route('/add_category', methods=['POST'])
-def add_category():
-    name = request.form['name']
-    category = Category(name=name)
-    db.session.add(category)
-    db.session.commit()
-    return redirect(url_for('index'))
-
-@application.route('/delete_category/<int:category_id>', methods=['POST'])
-def delete_category(category_id):
-    category = Category.query.filter_by(id=category_id).first()
-    db.session.delete(category)
-    db.session.commit()
-    return redirect(url_for('index'))
-
 @application.route('/amount_change', methods=['GET', 'POST'])
 def amount_change():
     message = ""
@@ -358,5 +398,7 @@ def amount_change():
 def create_tables():
     db.create_all()
 
+
+
 if __name__ == "__main__":
-   application.run(host='0.0.0.0')
+   application.run(host='0.0.0.0', debug="True")

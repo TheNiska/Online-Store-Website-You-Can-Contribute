@@ -3,7 +3,7 @@
 {% block title %} {{manufacturer.name }} {% endblock %}
 
 {% block content %}
-     <h1>Товары</h1>
+     <h1>Товары ({{ products|length }} шт)</h1>
      <h2 id="titl">Производитель: {{ manufacturer.name }}<button id="download-csv"><i class="fas fa-download"></i></button></h2>
      <h4><a href="#add_form">К концу страницы</a></h4>
     <table class="products_table">

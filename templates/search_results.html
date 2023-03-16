@@ -4,6 +4,7 @@
 
 {% block content %}
   <h1>Результаты поиска по запросу "{{ search_term }}"<button id="download-csv"><i class="fas fa-download"></i></button></h1>
+  <h1>{{ results|length }} результатов</h1>
 
   {% if results|length > 0 %}
     <table class="products_table">

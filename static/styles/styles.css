@@ -154,6 +154,10 @@ nav a:hover {
 }
  /*-----------------------------*/
 
+ .logo img {
+  width: 80px;
+ }
+
 .search-box {
   display: flex;
   align-items: center;

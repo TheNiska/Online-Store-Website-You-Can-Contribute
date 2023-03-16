@@ -4,21 +4,21 @@ from hello import db
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False) # поиск по этому полю
     name_eng = db.Column(db.String(100), nullable=True)
     manufacturers = db.relationship('Manufacturer', backref='category', cascade='all, delete-orphan')
 
 class Manufacturer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False) # поиск по этому полю
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     products = db.relationship('Product', backref='manufacturer', cascade='all, delete-orphan')
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False) # поиск по этому полю
     sku = db.Column(db.String(50), nullable=True)
-    description = db.Column(db.String(200))
+    description = db.Column(db.String(200)) # поиск по этому полю
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False)

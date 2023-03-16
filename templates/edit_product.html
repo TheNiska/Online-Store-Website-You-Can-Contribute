@@ -2,7 +2,7 @@
 
 {% block content %}
   <h1>Редактирование информации от товаре</h1>
-  <form method="POST" action="/update_product/{{ product.id }}" class="edit-product-form">
+  <form method="POST" action="/edit_product/{{ product.id }}" class="edit-product-form">
     <input type="hidden" name="category_name" value="{{ category_name }}">
     <div class="form-group">
       <label for="name">Название</label>

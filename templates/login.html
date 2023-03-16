@@ -1,22 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Login</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Вход</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='bath.png') }}">
+    <link href="{{ url_for('static', filename='styles/fontawesome/css/all.css') }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/login.css') }}">
 
 </head>
 <body>
-    <div class="container d-flex justify-content-center align-items-center vh-100">
-        <form method="post" class="text-center">
-            <h1 class="mb-5">Введите пароль:</h1>
-            <div class="form-group">
-                <label for="password">Пароль</label>
-                <input type="password" name="password" class="form-control" id="password">
+    <section>
+        <div class="form-box">
+            <div class="form-value">
+                <form method="post">
+                    <h2>Вход</h2>
+                    <div class="inputbox">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" name="password" id="password" required>
+                        <label for="password">Пароль</label>
+                    </div>
+                    <button type="submit" class="btn">Войти</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary mt-3">Войти</button>
-        </form>
-    </div>
+        </div>
+    </section>
 </body>
 </html>
 
