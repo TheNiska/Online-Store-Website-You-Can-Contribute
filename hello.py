@@ -8,6 +8,9 @@ import pytz
 from sqlalchemy import or_, and_, func
 from bs4 import BeautifulSoup
 import csv
+from flask_wtf import FlaskForm
+from wtforms import PasswordField, SubmitField
+from wtforms.validators import DataRequired
 
 application = Flask(__name__)
 application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///store.db'
@@ -16,6 +19,12 @@ application.secret_key = "Lmleo783L!sl"
 PASSWORD = "PFdmn1717"
 db = SQLAlchemy(application)
 tz = pytz.timezone('Europe/Moscow')
+
+
+class LoginForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
+
 
 from models import *
 
@@ -181,16 +190,18 @@ def index():
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        password = request.form['password']
+    form = LoginForm()
+    message = ""
+    if request.method == 'POST' and form.validate_on_submit():
+        password = form.password.data
         if check_password(password):
             # Устанавливаем cookie-файл с помощью функции make_response
             resp = make_response(redirect(url_for('index')))
             resp.set_cookie('auth', 'true')
             return resp
         else:
-            flash('Неверный пароль')
-    return render_template('login.html')
+            message = "Неверный пароль"
+    return render_template('login.html', form=form, message=message)
 
 @application.route('/logout')
 def logout():
@@ -354,15 +365,6 @@ def add_manufacturer(category_id):
     flash('Manufacturer added successfully')
     return redirect(url_for('manufacturers', category_id=category_id))
 
-@application.route('/delete_manufacturer/<int:id>', methods=['POST'])
-def delete_manufacturer(id):
-    manufacturer = Manufacturer.query.get(id)
-    category_id = manufacturer.category_id
-    db.session.delete(manufacturer)
-    db.session.commit()
-    flash('Manufacturer deleted successfully')
-    return redirect(url_for('manufacturers', category_id=category_id))
-
 
 @application.route('/amount_change', methods=['GET', 'POST'])
 def amount_change():
@@ -403,4 +405,4 @@ def create_tables():
 
 
 if __name__ == "__main__":
-   application.run(host='0.0.0.0')
+   application.run(host='0.0.0.0', debug=True)

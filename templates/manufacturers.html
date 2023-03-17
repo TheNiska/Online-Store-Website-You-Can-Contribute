@@ -1,31 +1,28 @@
 {% extends 'base.html' %}
 
 {% block title %} {{ category.name }} {% endblock %}
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/manufacturers.css') }}">
+{% endblock %}
 
 {% block content %}
     <h1>Производители</h1>
     <h2>Категория: {{ category.name }}</h2>
-  <table>
-      <tr>
-        <th>Название</th>
-        <th>Удалить</th>
-      </tr>
+    <ul class="manufacturers">
       {% for manufacturer in manufacturers %}
-      <tr>
-        <td><a href="{{ url_for('products', manufacturer_id=manufacturer.id, category_name=category.name_eng) }}">{{ manufacturer.name }}</a></td>
-        <td>
-          <form method="POST" action="/delete_manufacturer/{{ manufacturer.id }}">
-            <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" onclick="return confirm('Вы уверены что хотите удалить {{ manufacturer.name }}?')">Удалить</button>
-          </form>
-        </td>
-      </tr>
+        <a href="{{ url_for('products', manufacturer_id=manufacturer.id, category_name=category.name_eng) }}">
+          <li>{{ manufacturer.name }}</li>
+        </a>
+
       {% endfor %}
-  </table>
-  <form method="POST" action="/add_manufacturer/{{ category.id }}">
-      <label for="name">Название:</label>
-      <input type="text" name="name" required>
-      <input type="hidden" name="category_id" value="{{ category.id }}">
-      <button type="submit">Добавить производителя</button>
-  </form>
+    </ul>
+
+    <div class="manufacturers-form">
+      <form method="POST" action="/add_manufacturer/{{ category.id }}">
+          <label for="name">Название:</label>
+          <input type="text" name="name" required>
+          <input type="hidden" name="category_id" value="{{ category.id }}">
+          <button type="submit">Добавить</button>
+      </form>
+    </div>
 {% endblock %}

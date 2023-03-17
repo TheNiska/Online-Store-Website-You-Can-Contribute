@@ -14,17 +14,25 @@
         <div class="form-box">
             <div class="form-value">
                 <form method="post">
+                    {{ form.hidden_tag() }}
                     <h2>Вход</h2>
                     <div class="inputbox">
                         <i class="fa-solid fa-lock"></i>
-                        <input type="password" name="password" id="password" required>
+                        {{ form.password() }}
                         <label for="password">Пароль</label>
                     </div>
                     <button type="submit" class="btn">Войти</button>
                 </form>
             </div>
+            {% if message %}
+            <div class="message">
+                <p>{{ message }}</p>
+            </div>
         </div>
+    {% endif %}
     </section>
+
+
 </body>
 </html>
 

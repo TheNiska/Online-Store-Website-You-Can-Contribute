@@ -1,0 +1,47 @@
+.manufacturers {
+    margin: 20px auto;
+    padding: 0;
+    list-style: none;
+    text-align: center;
+    max-width: 400px;
+}
+
+.manufacturers a {
+    text-align: center;
+}
+
+.manufacturers li {
+    text-decoration: none;
+    padding: 0.7em;
+    border: 1px solid transparent;
+    transition: .5s;
+}
+
+.manufacturers li:hover {
+    border-color: var(--header-color);
+    border-radius: 100px;
+}
+
+
+.manufacturers-form form > * {
+    display: block;
+    padding: 0.5em;
+    outline: none;
+}
+.manufacturers-form form {
+    text-align: center;
+    display: block;
+    padding: 0.7em;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    max-width: 500px;
+    margin: 50px auto;
+    align-items: baseline;
+}
+
+.manufacturers-form button {
+    margin-left: 1em;
+    padding: 0.8em;
+    text-transform: uppercase;
+}

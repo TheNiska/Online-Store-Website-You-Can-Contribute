@@ -1,10 +1,8 @@
 
 :root {
   --background-color: #f7f7f7;
-  --primary-text-color: #212529;
   --primary-text-color: #1d2a57;
   --reverse-text-color: #fff;
-  --elements-color: #343a40;
   --elements-color: #0580e8;
   --elements-hover-color: #fec400;
   --header-color: #1d2a57;
@@ -13,7 +11,7 @@
 
 
 body {
-  background-color: var(--background-color);
+  background-color: var(--header-color);
   font-family: Arial, sans-serif;
   color: var(--primary-text-color);
   margin: 0px;
@@ -57,7 +55,14 @@ min-height: 100vh;
 }
 
 .container {
-flex: 1;
+  flex: 1;
+  background-color: var(--background-color);
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 20px;
+  padding: 1em;
+
 }
 
 header {
