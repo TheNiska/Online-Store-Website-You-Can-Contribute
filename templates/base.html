@@ -7,8 +7,9 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='bath.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='styles/fontawesome/css/all.css') }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/extended_search.css') }}">
     <!-- Yandex.Metrika counter -->
       <script type="text/javascript" >
        (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -59,9 +60,6 @@
   <body>
     <header>
        <nav>
-          <div class="logo">
-            <img src="{{ url_for('static', filename='logo.png') }}">
-          </div>
           <ul>
               <li><a href="/">Главная</a></li>
               <li><a href="#">О нас</a></li>
@@ -69,15 +67,37 @@
               <li><a href="#">Контакты</a></li>
               <li><a href="{{ url_for('amount_change') }}">Восстановить товар</a></li>
            </ul>
-           <div class="search-box">
-              <form class="search-form" action="{{ url_for('search') }}" method="POST">
-                <input type="hidden" name="form_id" value="nav-search">
-                <input type="text" name="search_term" placeholder="Поиск...">
-                <button type="submit" class="search-button"><i class="fa fa-search"></i>
-                </button>
-              </form>
-          </div>
       </nav>
+      <div class="extended-search">
+        <form action="{{ url_for('search') }}" method="POST">
+          <input type="hidden" name="form_id" value="extended-search">
+          <div class="select-form">
+            <select id="category" name="category">
+              <option value="">Все категории</option>
+              {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="select-form">
+            <select id="manufacturer" name="manufacturer">
+              <option value="">Все производители</option>
+              {% for manufacturer in manufacturers_set %}
+                <option value="{{ manufacturer }}">{{ manufacturer }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="select-form">
+            <input type="text" id="name_term" name="name_term" placeholder="название либо артикул">
+          </div>
+          <div class="select-form">
+            <input type="text" id="descr_term" name="descr_term" placeholder="слово в описании">
+          </div>
+          <div class="select-form">
+          <button type="submit" class="search-button icon-button"><i class="nav-icon fa fa-search"></i></button>
+          </div>
+        </form>
+    </div>
     </header>
     <div class="container">
       {% block content %}

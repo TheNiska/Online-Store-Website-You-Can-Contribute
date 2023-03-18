@@ -28,33 +28,6 @@ class LoginForm(FlaskForm):
 
 from models import *
 
-def global_lowering(product):
-    if product.name:
-        name = product.name
-        name = name.lower()
-        product.name = name
-
-    if product.sku:
-        sku = product.sku
-        sku = sku.lower()
-        product.sku = sku
-
-    if product.description:
-        descr = product.description
-        descr = descr.lower()
-        product.description = descr
-
-    if product.color:
-        color = product.color
-        color = color.lower()
-        product.color = color
-
-    if product.fct_type:
-        fct_type = product.fct_type
-        fct_type = fct_type.lower()
-        product.fct_type = fct_type
-
-    return 0
 
 
 # В этой функции мы проверяем авторизован ли пользователь перед заходом на любую страницу
@@ -65,6 +38,16 @@ def check_auth():
 
 def check_password(password):
     return password == PASSWORD
+
+@application.context_processor
+def inject_data():
+    categories = Category.query.all()
+    manufacturers = Manufacturer.query.all()
+    manufacturers_set = set()
+    for manufacturer in manufacturers:
+        manufacturers_set.add(manufacturer.name)
+
+    return dict(categories=categories, manufacturers_set=manufacturers_set)
 
 
 #----------функции для скачивания таблицы-----------------
@@ -123,26 +106,6 @@ def download_csv():
 
 @application.route('/', methods=['GET', 'POST'])
 def index():
-    categories = Category.query.all()
-    manufacturers = Manufacturer.query.all()
-    manufacturers_set = set()
-    for manufacturer in manufacturers:
-        manufacturers_set.add(manufacturer.name)
-
-
-    '''
-    # Получаем все элементы таблицы Product
-    products = Product.query.all()
-
-    # Применяем функцию global_lowering к каждому элементу
-    for product in products:
-        global_lowering(product)
-
-    # Сохраняем изменения в базе данных
-    db.session.commit()
-    
-    '''
-    
 
     # Определяем начало периода (за последние 10 дней)
     start_date = datetime.now() - timedelta(days=10)
@@ -168,25 +131,27 @@ def index():
         ).order_by(
             ProductSaleDate.sale_date
         ).all()
- 
+
+    # Преобразуем данные для использования в Chart.js
     data_dict = {}
     for el in sales_data:
         date_str = el[3].strftime('%d-%m-%y')
         if date_str not in data_dict:
-            data_dict[date_str] = []
+            data_dict[date_str] = {"sales": 0, "products": []}
+        data_dict[date_str]["sales"] += el[2]
+        data_dict[date_str]["products"].append({"name": el[0], "price": el[2]})
 
-        data_dict[date_str].append((el[0], el[1], el[2]))
+    chart_labels = []
+    chart_data = []
+    chart_products = []
+    for date, data in data_dict.items():
+        chart_labels.append(date)
+        chart_data.append(data["sales"])
+        chart_products.append(data["products"])
 
-     
-    sales_sum = {}
-    for el in data_dict:
-        money_sum = 0
-        for i in range (len(data_dict[el])):
-            money_sum += data_dict[el][i][2]
-        sales_sum[el] = money_sum
 
-    return render_template('index.html', data_dict=data_dict, sales_sum=sales_sum, 
-                            categories=categories, manufacturers_set=manufacturers_set)
+    return render_template('index.html', chart_labels=chart_labels, chart_data=chart_data, chart_products=chart_products)
+
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
@@ -212,23 +177,10 @@ def logout():
 @application.route('/search', methods=['POST'])
 def search():
     form_id = request.form.get("form_id")
-    print('Идентификатор формы: ', form_id, '\n')
     results = []
     search_term = ""
-    results_length = 0
 
-    if form_id == "nav-search":
-        search_term = request.form['search_term'].lower()
-        if (len(search_term)) > 2 and (not search_term.isspace()):
-            results = Product.query.filter(or_(Product.name.like('%' + search_term + '%'),
-                                               Product.sku.like('%' + search_term + '%')),
-                                               Product.quantity > 0
-                                           ).all()
-            results_length = len(results)
-        else:
-            results = []
-
-    elif form_id == "extended-search":
+    if form_id == "extended-search":
         category_id = request.form["category"]
         manufacturer_name = request.form["manufacturer"]
         name_term = request.form["name_term"].lower()
@@ -238,16 +190,12 @@ def search():
                    filter(or_(Category.id == category_id, not category_id)).\
                    filter(or_(Manufacturer.name == manufacturer_name, not manufacturer_name)).\
                    filter(and_(Product.quantity > 0,
-                               Product.name.like(f'%{name_term}%'),
+                               or_(Product.name.like(f'%{name_term}%'), Product.sku.like(f'%{name_term}%')),
                                Product.description.like(f'%{descr_term}%'))).all()
         search_term = name_term + " " + descr_term
         results = products
-        results_length = len(results)
 
-
-
-    return render_template('search_results.html', results=results, search_term=search_term, 
-                            results_length=results_length)
+    return render_template('search_results.html', results=results, search_term=search_term)
 
 
 @application.route('/products/<int:manufacturer_id>/<string:category_name>')
@@ -405,4 +353,4 @@ def create_tables():
 
 
 if __name__ == "__main__":
-   application.run(host='0.0.0.0', debug=True)
+   application.run(host='0.0.0.0')

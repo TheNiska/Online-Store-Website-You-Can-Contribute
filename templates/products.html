@@ -61,15 +61,13 @@
         <td>{{ product.last_updated.strftime('%Y-%m-%d %H:%M')}}</td>
         <td class="table_actions">
           <form method="GET" action="/edit_product/{{ product.id }}">
-            <button type="submit" class="edit-button">
-              <svg class="svg-icon" width="24px" height="24px" clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m19 20.25c0-.402-.356-.75-.75-.75-2.561 0-11.939 0-14.5 0-.394 0-.75.348-.75.75s.356.75.75.75h14.5c.394 0 .75-.348.75-.75zm-12.023-7.083c-1.334 3.916-1.48 4.232-1.48 4.587 0 .527.46.749.749.749.352 0 .668-.137 4.574-1.493zm1.06-1.061 3.846 3.846 8.824-8.814c.195-.195.293-.451.293-.707 0-.255-.098-.511-.293-.706-.692-.691-1.742-1.741-2.435-2.432-.195-.195-.451-.293-.707-.293-.254 0-.51.098-.706.293z" fill-rule="nonzero"/></svg>
+            <button type="submit" class="icon-button"><i class="table-icon fa-solid fa-marker"></i>
             </button>
             <input type="hidden" name="category_name" value="{{ category_name }}">
           </form>
           <form method="POST" action="/delete_product/{{ product.id }}">
             <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" onclick="return confirm('Вы уверены, что хотите удалить {{ product.name }}?')" class="delete-button">
-              <svg class="svg-icon" width="24px" height="24px" clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m21 3.998c0-.478-.379-1-1-1h-16c-.62 0-1 .519-1 1v16c0 .621.52 1 1 1h16c.478 0 1-.379 1-1zm-8.991 6.932 2.717-2.718c.146-.146.338-.219.53-.219.405 0 .751.325.751.75 0 .193-.073.384-.219.531l-2.718 2.717 2.728 2.728c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.384-.073-.531-.219l-2.728-2.728-2.728 2.728c-.146.146-.339.219-.531.219-.401 0-.75-.323-.75-.75 0-.192.073-.384.22-.531l2.728-2.728-2.722-2.722c-.146-.147-.219-.338-.219-.531 0-.425.346-.749.75-.749.192 0 .384.073.53.219z" fill-rule="nonzero"/></svg>
+            <button type="submit" onclick="return confirm('Вы уверены, что хотите удалить {{ product.name }}?')" class="icon-button"><i class="table-icon fa-solid fa-trash"></i>
             </button>
             <input type="hidden" name="category_name" value="{{ category_name }}">
           </form>
