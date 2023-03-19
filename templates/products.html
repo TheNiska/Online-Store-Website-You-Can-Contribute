@@ -38,9 +38,9 @@
         <td class="products_price">{{ product.price }} &#8381;</td>
         <td class="table_buttons">
           <form class="upd_form" method="POST" action="/update_quantity/{{ product.id }}">
-            <input type="hidden" name="_method" value="PUT">
             <input type="hidden" name="quantity" value="{{ product.quantity }}">
             <input type="hidden" name="category_name" value="{{ category_name }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
             <button class="sellDialog" type="button">-</button>
                 <div class="sellModal">
                 <div class="modal-content">
@@ -49,13 +49,13 @@
                   <p>Если же вы хотите удалить единицу товара без заноса в базу данных, то нажмите "Удалить"</p>
                   <p>Нажмите "Отмена" для выхода</p>
                   <input type="date" name="sale_date">
-                  <button type="submit" name="action" value="-">Продано</button>
-                  <button type="submit" name="action" value="del">Удалить</button>
+                  <button type="submit" class="update-quantity" name="action" value="-">Продано</button>
+                  <button type="submit" class="update-quantity" name="action" value="del">Удалить</button>
                   <button type="button" class="cancelbtn">Отмена</button>
                 </div>
                 </div>
-            <span class="product_quantity">{{ product.quantity }}</span>
-            <button type="submit" name="action" value="+">+</button>
+            <span class="product_quantity" id="quantity-{{ product.id }}">{{ product.quantity }}</span>
+            <button type="submit" class="update-quantity" name="action" value="+">+</button>
           </form>
         </td>
         <td>{{ product.last_updated.strftime('%Y-%m-%d %H:%M')}}</td>
@@ -186,6 +186,40 @@ sellDialogs.forEach(function(dialog, index) {
   });
 });
 
+</script>
+
+<script>
+  // Обработчик клика на кнопку изменения количества продукта
+$('.update-quantity').click(function(event) {
+  event.preventDefault();
+  var form = $(this).closest('form'); // находим ближайшую форму-родителя
+  var productId = form.find('input[name="product_id"]').val();
+  var category = form.find('input[name="category_name"]').val();
+  var quantity = form.find('input[name="quantity"]').val();
+  var saleDate = form.find('input[name="sale_date"]').val();
+  var action = $(this).val();
+
+  // Отправляем POST-запрос на сервер
+  $.ajax({
+    url: '/update_quantity/' + productId,
+    method: 'POST',
+    data: {
+      category_name: category,
+      action: action,
+      sale_date: saleDate,
+      quantity: quantity
+    },
+    success: function(response) {
+      // Обновляем содержимое страницы
+      var quantity = response.quantity_tmp
+      $('#quantity-' + productId).text(quantity);
+      alert('Количество товара успешно обновлено');
+    },
+    error: function(xhr, status, error) {
+      alert('Произошла ошибка при обновлении количества товара');
+    }
+  });
+});
 </script>
 
 {% endblock %}

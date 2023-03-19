@@ -16,6 +16,7 @@
         <th data-type="number">Цена</th>
         <th>Количество</th>
         <th>Дата цены</th>
+        <th>Действия</th>
       </tr>
     </thead>
     <tbody>
@@ -25,8 +26,42 @@
         <td class="sku">{{ product.sku }}</td>
         <td class="products_descr">{{ product.description }}</td>
         <td class="products_price">{{ product.price }} &#8381;</td>
-        <td><span class="product_quantity">{{ product.quantity }}</span></td>
+        <td class="table_buttons">
+          <form class="upd_form forms_on_search"  method="POST" action="/update_quantity/{{ product.id }}">
+            <input type="hidden" name="quantity" value="{{ product.quantity }}">
+            <input type="hidden" name="category_name" value="{{ category_name }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <button class="sellDialog" type="button">-</button>
+                <div class="sellModal">
+                <div class="modal-content">
+                  <span class="close">&times;</span>
+                  <p>Если товар был продан, то введите дату продажи и нажмите на кнопку "Продано"</p>
+                  <p>Если же вы хотите удалить единицу товара без заноса в базу данных, то нажмите "Удалить"</p>
+                  <p>Нажмите "Отмена" для выхода</p>
+                  <input type="date" name="sale_date">
+                  <button type="submit" class="update-quantity" name="action" value="-">Продано</button>
+                  <button type="submit" class="update-quantity" name="action" value="del">Удалить</button>
+                  <button type="button" class="cancelbtn">Отмена</button>
+                </div>
+                </div>
+            <span class="product_quantity" id="quantity-{{ product.id }}">{{ product.quantity }}</span>
+            <button type="submit" class="update-quantity" name="action" value="+">+</button>
+          </form>
+        </td>
         <td>{{ product.last_updated.strftime('%Y-%m-%d %H:%M')}}</td>
+        <td class="table_actions">
+          <form class="forms_on_search" method="GET" action="/edit_product/{{ product.id }}">
+            <button type="submit" class="icon-button"><i class="table-icon fa-solid fa-marker"></i>
+            </button>
+            <input type="hidden" name="category_name" value="{{ category_name }}">
+          </form>
+          <form class="forms_on_search" method="POST" action="/delete_product/{{ product.id }}">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" onclick="return confirm('Вы уверены, что хотите удалить {{ product.name }}?')" class="icon-button"><i class="table-icon fa-solid fa-trash"></i>
+            </button>
+            <input type="hidden" name="category_name" value="{{ category_name }}">
+          </form>
+        </td>
       </tr>
     {% endfor %}
   </tbody>
@@ -78,6 +113,73 @@
             }
         });
     });
+</script>
+
+<script type="text/javascript">
+// JavaScript код, который вызывает диалоговое окно
+var sellDialogs = document.querySelectorAll(".sellDialog");
+var sellModals = document.querySelectorAll(".sellModal");
+var closeBtns = document.querySelectorAll(".close");
+var cancelBtns = document.querySelectorAll(".cancelbtn");
+
+sellDialogs.forEach(function(dialog, index) {
+  var modal = sellModals[index];
+  var close = closeBtns[index];
+  var cancel = cancelBtns[index];
+
+  dialog.addEventListener("click", function() {
+    modal.style.display = "block";
+  });
+
+  close.addEventListener("click", function() {
+    modal.style.display = "none";
+  });
+
+  cancel.addEventListener("click", function() {
+    modal.style.display = "none";
+  });
+
+  window.addEventListener("click", function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  });
+});
+
+</script>
+
+<script>
+  // Обработчик клика на кнопку изменения количества продукта
+$('.update-quantity').click(function(event) {
+  event.preventDefault();
+  var form = $(this).closest('form'); // находим ближайшую форму-родителя
+  var productId = form.find('input[name="product_id"]').val();
+  var category = form.find('input[name="category_name"]').val();
+  var quantity = form.find('input[name="quantity"]').val();
+  var saleDate = form.find('input[name="sale_date"]').val();
+  var action = $(this).val();
+
+  // Отправляем POST-запрос на сервер
+  $.ajax({
+    url: '/update_quantity/' + productId,
+    method: 'POST',
+    data: {
+      category_name: category,
+      action: action,
+      sale_date: saleDate,
+      quantity: quantity
+    },
+    success: function(response) {
+      // Обновляем содержимое страницы
+      var quantity = response.quantity_tmp
+      $('#quantity-' + productId).text(quantity);
+      alert('Количество товара успешно обновлено');
+    },
+    error: function(xhr, status, error) {
+      alert('Произошла ошибка при обновлении количества товара');
+    }
+  });
+});
 </script>
 
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask, render_template, request, redirect, url_for, flash, make_response, current_app
+from flask import Flask, render_template, request, redirect, url_for, flash, make_response, current_app, jsonify
 from functools import wraps
 from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
@@ -271,23 +271,24 @@ def delete_product(product_id):
 @application.route('/update_quantity/<int:product_id>', methods=['POST'])
 def update_quantity(product_id):
     product = Product.query.get(product_id)
+    quantity_tmp = product.quantity
     category_name = request.form['category_name']
     action = request.form['action']
     if action == '+':
         product.quantity += 1
+        quantity_tmp = product.quantity
     elif action == 'del':
         product.quantity -= 1
+        quantity_tmp = product.quantity
     elif action == '-':
         product.quantity -=1
+        quantity_tmp = product.quantity
         date = request.form['sale_date']
         sale_date = datetime.strptime(date, '%Y-%m-%d').date()
         product_sale_date = ProductSaleDate(product_id=product.id, sale_date=sale_date)
         db.session.add(product_sale_date)
-
-
     db.session.commit()
-    flash('Product quantity updated successfully')
-    return redirect(url_for('products', manufacturer_id=product.manufacturer_id, category_name=category_name))
+    return jsonify({'success': True, 'quantity_tmp': quantity_tmp})
 
 
 @application.route('/manufacturers/<int:category_id>')
