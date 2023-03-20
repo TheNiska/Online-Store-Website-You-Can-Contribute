@@ -150,6 +150,7 @@ def index():
         chart_products.append(data["products"])
 
 
+
     return render_template('index.html', chart_labels=chart_labels, chart_data=chart_data, chart_products=chart_products)
 
 
@@ -260,13 +261,10 @@ def add_product(manufacturer_id):
 
 @application.route('/delete_product/<int:product_id>', methods=['POST'])
 def delete_product(product_id):
-    category_name = request.form['category_name']
     product = Product.query.get(product_id)
-    manufacturer_id = product.manufacturer_id
     db.session.delete(product)
     db.session.commit()
-    flash('Product deleted successfully')
-    return redirect(url_for('products', manufacturer_id=manufacturer_id, category_name=category_name))
+    return jsonify({'success': True})
 
 @application.route('/update_quantity/<int:product_id>', methods=['POST'])
 def update_quantity(product_id):

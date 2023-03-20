@@ -1,10 +1,15 @@
 {% extends 'base.html' %}
 
+{% block links %}
+
+{% endblock %}
+
 {% block title %}Результаты{% endblock %}
 
 {% block content %}
   <h1>Результаты поиска по запросу "{{ search_term }}"<button id="download-csv"><i class="fas fa-download"></i></button></h1>
   <h1>{{ results|length }} результатов</h1>
+  <div id="image-container"></div>
 
   {% if results|length > 0 %}
     <table class="products_table">
@@ -22,7 +27,7 @@
     <tbody>
       {% for product in results %}
       <tr>
-        <td>{{ product.name }}</td>
+        <td><button type="submit" data-image-url="{{ url_for('static', filename='images/products/' + product.sku + '.jpg') }}" class="icon-button show-image"><i class="table-icon fa-regular fa-image"></i></button>{{ product.name }}</td>
         <td class="sku">{{ product.sku }}</td>
         <td class="products_descr">{{ product.description }}</td>
         <td class="products_price">{{ product.price }} &#8381;</td>
@@ -56,10 +61,9 @@
             <input type="hidden" name="category_name" value="{{ category_name }}">
           </form>
           <form class="forms_on_search" method="POST" action="/delete_product/{{ product.id }}">
-            <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" onclick="return confirm('Вы уверены, что хотите удалить {{ product.name }}?')" class="icon-button"><i class="table-icon fa-solid fa-trash"></i>
+            <button type="submit" onclick="return confirm('Вы уверены, что хотите удалить {{ product.name }}?')" class="icon-button delete-button"><i class="table-icon fa-solid fa-trash"></i>
             </button>
-            <input type="hidden" name="category_name" value="{{ category_name }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
           </form>
         </td>
       </tr>
@@ -149,38 +153,29 @@ sellDialogs.forEach(function(dialog, index) {
 </script>
 
 <script>
-  // Обработчик клика на кнопку изменения количества продукта
-$('.update-quantity').click(function(event) {
-  event.preventDefault();
-  var form = $(this).closest('form'); // находим ближайшую форму-родителя
-  var productId = form.find('input[name="product_id"]').val();
-  var category = form.find('input[name="category_name"]').val();
-  var quantity = form.find('input[name="quantity"]').val();
-  var saleDate = form.find('input[name="sale_date"]').val();
-  var action = $(this).val();
+$(document).ready(function() {
+  var $container = $('#image-container'); // объявляем переменную заранее
 
-  // Отправляем POST-запрос на сервер
-  $.ajax({
-    url: '/update_quantity/' + productId,
-    method: 'POST',
-    data: {
-      category_name: category,
-      action: action,
-      sale_date: saleDate,
-      quantity: quantity
-    },
-    success: function(response) {
-      // Обновляем содержимое страницы
-      var quantity = response.quantity_tmp
-      $('#quantity-' + productId).text(quantity);
-      alert('Количество товара успешно обновлено');
-    },
-    error: function(xhr, status, error) {
-      alert('Произошла ошибка при обновлении количества товара');
-    }
+  $('.show-image').on('click', function() {
+    event.stopPropagation();
+    var imageUrl = $(this).data('image-url');
+    var $image = $('<img>').attr('src', imageUrl);
+    $container.empty().append($image).show();
+
+    $(document).on('click', function(event) {
+      if (!$container.is(event.target) && $container.has(event.target).length === 0) {
+        $container.hide();
+      }
+    });
+
+    $(document).on('scroll', function() {
+      $container.hide(); // закрываем изображение при скролле
+    });
+    
   });
 });
 </script>
 
 
+<script type="text/javascript" src="{{ url_for('static', filename='js/table_actions.js') }}"></script>
 {% endblock %}
