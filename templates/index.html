@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block links %}
-
 {% endblock %}
 
 {% block title %}Profinters - магазин сантехники{% endblock %}
@@ -17,26 +16,6 @@
         </a>
       {% endfor %}
     </div>
-
-
-     <div class="last_sales">
-       {% for el in data_dict %}
-            <h3>{{ el }}</h3>
-            {% for info in data_dict[el] %}
-                <br>
-                <span>{{ info[0] }}</span>
-                <span>{{ info[1] }}</span>
-                <span class="prices">{{ info[2] }}</span>
-            {% endfor %}
-            <br>
-            <p>Сумма за день: {{ sales_sum[el] }}</p>
-            <hr>
-        {% endfor %}
-      </div>
-
-
-
-
     
   
 {% endblock %}

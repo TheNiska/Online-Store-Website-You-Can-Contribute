@@ -107,51 +107,7 @@ def download_csv():
 @application.route('/', methods=['GET', 'POST'])
 def index():
 
-    # Определяем начало периода (за последние 10 дней)
-    start_date = datetime.now() - timedelta(days=10)
-
-    # Запрос на получение данных
-    sales_data = db.session.query(
-            Product.name,
-            Product.sku,
-            Product.price,
-            ProductSaleDate.sale_date,
-            db.func.sum(Product.price).label('daily_sales')
-        ).join(
-            ProductSaleDate,
-            Product.id == ProductSaleDate.product_id
-        ).filter(
-            ProductSaleDate.sale_date >= start_date
-        ).group_by(
-            Product.name,
-            Product.sku,
-            Product.price,
-            ProductSaleDate.sale_date,
-            ProductSaleDate.id
-        ).order_by(
-            ProductSaleDate.sale_date
-        ).all()
-
-    # Преобразуем данные для использования в Chart.js
-    data_dict = {}
-    for el in sales_data:
-        date_str = el[3].strftime('%d-%m-%y')
-        if date_str not in data_dict:
-            data_dict[date_str] = {"sales": 0, "products": []}
-        data_dict[date_str]["sales"] += el[2]
-        data_dict[date_str]["products"].append({"name": el[0], "price": el[2]})
-
-    chart_labels = []
-    chart_data = []
-    chart_products = []
-    for date, data in data_dict.items():
-        chart_labels.append(date)
-        chart_data.append(data["sales"])
-        chart_products.append(data["products"])
-
-
-
-    return render_template('index.html', chart_labels=chart_labels, chart_data=chart_data, chart_products=chart_products)
+    return render_template('index.html')
 
 
 @application.route('/login', methods=['GET', 'POST'])
@@ -212,9 +168,9 @@ def edit_product(product_id):
     if request.method == 'POST':
         category_name = request.form['category_name']
         old_price = float(request.form['old_price'])
-        product.name = request.form['name'].lower()
-        product.sku = request.form['sku'].lower()
-        product.description = request.form['description'].lower()
+        product.name = request.form['name'].lower().strip()
+        product.sku = request.form['sku'].lower().strip()
+        product.description = request.form['description'].lower().strip()
         product.price = float(request.form['price'])
         if product.price != old_price:
             product.last_updated = datetime.now(tz)
@@ -228,9 +184,9 @@ def edit_product(product_id):
 @application.route('/add_product/<int:manufacturer_id>', methods=['POST'])
 def add_product(manufacturer_id):
     category_name = request.form['category_name']
-    name = request.form['name'].lower()
-    sku = request.form['sku'].lower()
-    description = request.form['description'].lower()
+    name = request.form['name'].lower().strip()
+    sku = request.form['sku'].lower().strip()
+    description = request.form['description'].lower().strip()
     price = request.form['price']
     quantity = request.form['quantity']
     last_updated = datetime.now(tz)
@@ -343,6 +299,53 @@ def amount_change():
                 return render_template('amount.html', message=message)
 
     return render_template('amount.html', message=message)
+
+@application.route('/history', methods=['GET'])
+def history():
+
+        # Определяем начало периода (за последние 31 дней)
+    start_date = datetime.now() - timedelta(days=31)
+
+    # Запрос на получение данных
+    sales_data = db.session.query(
+            Product.name,
+            Product.sku,
+            Product.price,
+            ProductSaleDate.sale_date,
+            db.func.sum(Product.price).label('daily_sales')
+        ).join(
+            ProductSaleDate,
+            Product.id == ProductSaleDate.product_id
+        ).filter(
+            ProductSaleDate.sale_date >= start_date
+        ).group_by(
+            Product.name,
+            Product.sku,
+            Product.price,
+            ProductSaleDate.sale_date,
+            ProductSaleDate.id
+        ).order_by(
+            ProductSaleDate.sale_date
+        ).all()
+
+    # Преобразуем данные для использования в Chart.js
+    data_dict = {}
+    for el in sales_data:
+        date_str = el[3].strftime('%d-%m-%y')
+        if date_str not in data_dict:
+            data_dict[date_str] = {"sales": 0, "products": []}
+        data_dict[date_str]["sales"] += el[2]
+        data_dict[date_str]["products"].append({"name": el[0], "price": el[2], "sku": el[1]})
+
+    chart_labels = []
+    chart_data = []
+    chart_products = []
+    for date, data in data_dict.items():
+        chart_labels.append(date)
+        chart_data.append(data["sales"])
+        chart_products.append(data["products"])
+
+    return render_template('salesHistory.html', labels=chart_labels, data=chart_data, products=chart_products, len=len)
 
 
 @application.before_first_request

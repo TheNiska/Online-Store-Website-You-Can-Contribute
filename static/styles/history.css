@@ -1,0 +1,23 @@
+table p::first-letter {
+    text-transform: uppercase;
+}
+
+table {
+    text-align: center;
+}
+
+table caption {
+    font-size: 2em;
+    margin-bottom: 1em;
+}
+span.product_price {
+    font-weight: bold;
+}
+span.product_sku {
+    text-transform: uppercase;
+    color: #115;
+}
+
+th:nth-of-type(2) {
+    width: 50%;
+}
