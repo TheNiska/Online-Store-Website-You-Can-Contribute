@@ -38,20 +38,24 @@ $('.delete-button').click(function(event) {
     var productId = form.find('input[name="product_id"]').val();
     var button = $(this)
 
-    // Отправляем POST-запрос на сервер
-    $.ajax({
-      url: '/delete_product/' + productId,
-      method: 'POST',
-      dataType: 'json', 
+    // Запрашиваем подтверждение удаления
+    if (!confirm('Вы уверены, что хотите удалить этот товар?')) {
+        return;
+    }
+      // Отправляем POST-запрос на сервер
+      $.ajax({
+        url: '/delete_product/' + productId,
+        method: 'POST',
+        dataType: 'json', 
 
-      success: function(response) {
-        // Обновляем содержимое страницы
-        var tr = button.closest('tr');
-        tr.remove()
-        alert('Товар удален');
-      },
-      error: function(xhr, status, error) {
-        alert('Произошла ошибка при удалении товара');
-      }
-    });
+        success: function(response) {
+          // Обновляем содержимое страницы
+          var tr = button.closest('tr');
+          tr.remove()
+          alert('Товар удален');
+        },
+        error: function(xhr, status, error) {
+          alert('Произошла ошибка при удалении товара');
+        }
+      });
 });

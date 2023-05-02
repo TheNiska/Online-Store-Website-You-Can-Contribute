@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/products_squares.css') }}">
+{% endblock %}
+
+{% block title %}Результаты{% endblock %}
+
+{% block content %}
+  <h1>Результаты поиска по запросу "{{ search_term }}"</h1>
+  <h1>{{ results|length }} результатов</h1>
+  <div id="image-container"></div>
+
+  {% if results|length > 0 %}
+     <div class="squares-wrapper">
+      {% for product in results %}
+      <div class="product-square">
+        <div class="img-section">
+          <div class="img-wrapper">
+            <div class="controls">
+                <button type="button" class="icon-button">
+                  <i class="fa-solid fa-share-nodes"></i>
+                </button>
+                <button class="icon-button like" type="button" data-productid="{{ product.id }}" {% if product.id|string in liked_products %} style="color: red;" {% endif %}>
+                  <i class="fa-solid fa-heart"></i>
+                </button>
+            </div>
+            <div class="only-img">
+            <img src="{{ url_for('static', filename='images/products/' + product.sku + '.jpg') }}" alt="{{product.name}}">
+            </div>
+            <div class="quantity">{{ product.quantity }}</div>
+          </div>
+        </div>
+
+        <div class="info-wrapper">
+          <div class="product-name">
+            <h1>{{ product.name }}</h1>
+            <span>КОД: {{ product.sku }}</span>
+          </div>
+          <p class="product-price"><span>{{ int(product.price) }}</span> &#8381;</p>
+          <p class="faucet-type">{{ product.fct_type }}</p>
+          <p class="faucet-filter">{% if product.fct_fltr %}Да{% else %}Нет{% endif %}</p>
+          <p class="color">{{ product.color }}</p>
+          <p class="material">{{ product.material }}</p>
+          <p class="descr">{{ product.description }}</p>
+      </div>
+    </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+<script>
+$('.like').click(function(event) {
+  var productId = $(this).data('productid');
+  $(this).removeAttr('style');
+
+  // Отправляем POST-запрос на сервер
+  $.ajax({
+    url: '/like/' + productId,
+    method: 'POST',
+    success: function(response) {
+      if (response.result === 'added') {
+        // Изменяем цвет кнопки лайка
+        $(event.target).css('color', 'red');
+        } else if (response.result === 'removed') {
+        // Изменяем цвет кнопки лайка
+        $(event.target).css('color', 'inherit');
+        }
+    },
+    error: function(xhr, status, error) {
+      alert('Произошла ошибка');
+    }
+  });
+});
+</script>
+{% endblock %}

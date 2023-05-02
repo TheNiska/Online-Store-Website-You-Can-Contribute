@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %} {{manufacturer.name }} {% endblock %}
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/products_squares.css') }}">
+{% endblock %}
+
+{% block content %}
+     <h1>Товары ({{ products|length }} шт)</h1>
+     <h2 id="titl">Производитель: {{ manufacturer.name }}</h2>
+     <div class="squares-wrapper">
+      {% for product in products %}
+      <div class="product-square">
+        <div class="img-section">
+          <div class="img-wrapper">
+            <div class="controls">
+                <button type="button" class="icon-button">
+                  <i class="fa-solid fa-share-nodes"></i>
+                </button>
+                <form method="GET" action="/edit_product/{{ product.id }}">
+                <button type="submit" class="icon-button"><i class="fa-solid fa-marker"></i>
+                </button>
+              <input type="hidden" name="category_name" value="{{ category_name }}">
+            </form> 
+                <button class="icon-button like" type="button" data-productid="{{ product.id }}" {% if product.id|string in liked_products %} style="color: red;" {% endif %}>
+                  <i class="fa-solid fa-heart"></i>
+                </button>
+            </div>
+            <div class="only-img">
+            <img src="{{ url_for('static', filename='images/products/' + product.sku + '.jpg') }}" alt="{{product.name}}">
+            </div>
+            <div class="quantity">{{ product.quantity }}</div>
+          </div>
+        </div>
+
+        <div class="info-wrapper">
+          <div class="product-name">
+            <h1>{{ product.name }}</h1>
+            <span>КОД: {{ product.sku }}</span>
+          </div>
+          <p class="product-price"><span>{{ int(product.price) }}</span> &#8381;</p>
+          {% if category_name == "mixers" %}
+          <p class="faucet-type">{{ product.fct_type }}</p>
+          <p class="faucet-filter">{% if product.fct_fltr %}Да{% else %}Нет{% endif %}</p>
+          {% endif %}
+          <p class="color">{{ product.color }}</p>
+          <p class="material">{{ product.material }}</p>
+          <p class="descr">{{ product.description}}</p>
+      </div>
+    </div>
+      {% endfor %}
+    </div>
+
+
+    <form id="add_form" method="POST" action="/add_product/{{ manufacturer.id }}">
+      <label for="name">Название:</label>
+      <input type="text" name="name" required>
+      <br>
+      <label for="sku">Артикул:</label>
+      <input type="text" name="sku">
+      <br>
+      <label for="description">Описание:</label>
+      <input type="text" name="description">
+      <br>
+      {% if category_name == "mixers" %}
+      <label for="color">Цвет</label>
+      <input type="text" name="color">
+      <br>
+      <label for="fct_type">Тип</label>
+      <select name="fct_type">
+        <option value="для умывальника">Для умывальника</option>
+        <option value="для кухни">Для кухни</option>
+        <option value="для ванны">Для ванны</option>
+        <option value="для биде">Для биде</option>
+      </select>
+      <br>
+      <label for="fct_fltr">Под фильтр</label>
+      <input type="checkbox" name="fct_fltr" id="checkbox">
+
+      {% endif %}
+      <label for="price">Цена:</label>
+      <input type="number" name="price" step="0.01" min="0" required>
+      <br>
+      <label for="quantity">Количество:</label>
+      <input type="number" name="quantity" min="0" required>
+      <br>
+      <input type="hidden" name="category_name" value="{{ category_name }}">
+      <button type="submit">Добавить</button>
+    </form>
+
+<script>
+$('.like').click(function(event) {
+  var productId = $(this).data('productid');
+  $(this).removeAttr('style');
+
+  // Отправляем POST-запрос на сервер
+  $.ajax({
+    url: '/like/' + productId,
+    method: 'POST',
+    success: function(response) {
+      if (response.result === 'added') {
+        // Изменяем цвет кнопки лайка
+        $(event.target).css('color', 'red');
+        } else if (response.result === 'removed') {
+        // Изменяем цвет кнопки лайка
+        $(event.target).css('color', 'inherit');
+        }
+    },
+    error: function(xhr, status, error) {
+      alert('Произошла ошибка');
+    }
+  });
+});
+</script>
+{% endblock %}

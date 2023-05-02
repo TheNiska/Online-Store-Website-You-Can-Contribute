@@ -7,26 +7,9 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='bath.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="{{ url_for('static', filename='styles/fontawesome/css/all.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Macondo&family=Raleway:wght@200;300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/extended_search.css') }}">
-    <!-- Yandex.Metrika counter -->
-      <script type="text/javascript" >
-       (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-       m[i].l=1*new Date();
-       for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-       k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-       (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-
-       ym(92841749, "init", {
-            clickmap:true,
-            trackLinks:true,
-            accurateTrackBounce:true,
-            webvisor:true
-       });
-      </script>
-      <noscript><div><img src="https://mc.yandex.ru/watch/92841749" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-    <!-- /Yandex.Metrika counter -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/fontawesome/css/all.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/styles.css') }}">
     {% block links %} {% endblock %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -62,42 +45,64 @@
        <nav>
           <ul>
               <li><a href="/">Главная</a></li>
-              <li><a href="#">Контакты</a></li>
-              <li><a href="{{ url_for('amount_change') }}">Восстановить товар</a></li>
-              <li><a href="{{ url_for('history') }}">История продаж</a></li>
            </ul>
+            <div class="contacts">
+              <p> <i class="fa-solid fa-location-dot"></i><span>г.Воронеж, ул.Донбасская 23Б, бокс 16</span></p>
+              <p> <i class="fa-solid fa-phone"></i><span>8(473)259-72-67</span></p>
+              <p> <i class="fa-solid fa-phone"></i><span>8(473)259-72-77</span></p>
+            </div>
       </nav>
-      <div class="extended-search">
-        <form action="{{ url_for('search') }}" method="POST">
-          <input type="hidden" name="form_id" value="extended-search">
-          <div class="select-form">
-            <select id="category" name="category">
-              <option value="">Все категории</option>
-              {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="select-form">
-            <select id="manufacturer" name="manufacturer">
-              <option value="">Все производители</option>
-              {% for manufacturer in manufacturers_set %}
-                <option value="{{ manufacturer }}">{{ manufacturer }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="select-form">
-            <input type="text" id="name_term" name="name_term" placeholder="название либо артикул">
-          </div>
-          <div class="select-form">
-            <input type="text" id="descr_term" name="descr_term" placeholder="слово в описании">
-          </div>
-          <div class="select-form">
-          <button type="submit" class="search-button icon-button"><i class="nav-icon fa fa-search"></i></button>
-          </div>
-        </form>
-    </div>
     </header>
+    <section id="sidebar" class="hide">
+        <div class="extended-search">
+          <button type="button" id="toggle-btn">
+            <i class="fa-brands fa-searchengin"></i>
+          </button>
+          <form action="{{ url_for('search') }}" method="POST">
+            <input type="hidden" name="form_id" value="extended-search">
+
+            <div class="select-form">
+              <select id="category" name="category">
+                <option value="">Все категории</option>
+                {% for category in categories %}
+                  <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="select-form">
+              <select id="manufacturer" name="manufacturer">
+                <option value="">Все производители</option>
+                {% for manufacturer in manufacturers_set %}
+                  <option value="{{ manufacturer }}">{{ manufacturer }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="select-form faucet-field">
+              <select id="fct_type" name="fct_type">
+                <option value="">Все типы</option>
+                <option value="для умывальника">Для умывальника</option>
+                <option value="для кухни">Для кухни</option>
+                <option value="для ванны">Для ванны</option>
+                <option value="для биде">Для биде</option>
+              </select>
+            </div>
+
+            <div class="select-form faucet-field">
+              <input type="text" id="color" name="color" placeholder="цвет смесителя">
+            </div>
+
+            <div class="select-form">
+              <input type="text" id="name_term" name="name_term" placeholder="название либо артикул">
+            </div>
+            <div class="select-form">
+              <input type="text" id="descr_term" name="descr_term" placeholder="слово в описании">
+            </div>
+          <button type="submit" class="search-button icon-button"><i class="nav-icon fa fa-search"></i></button>
+        </form>
+      </div>
+    </section>
     <div class="container">
       {% block content %}
       
@@ -109,5 +114,37 @@
       <a href="/">К категориям</a>
       <a href="{{ url_for('logout') }}">Выйти</a>
     </footer>
+    <script type="text/javascript">
+  // Получаем элементы, которые нужно показать/скрыть
+  var faucetFields = document.querySelectorAll('.faucet-field');
+
+  // Получаем элемент выбора категории
+  var categorySelect = document.getElementById('category');
+
+  // Обработчик изменения значения элемента выбора категории
+  categorySelect.addEventListener('change', function() {
+    // Если выбрана категория "смесители", то показываем поля для выбора типа и цвета
+    if (categorySelect.value === '5') {
+      for (var i = 0; i < faucetFields.length; i++) {
+        faucetFields[i].style.display = 'block';
+      }
+    }
+    // Иначе скрываем поля для категории "смесители"
+else {
+for (var i = 0; i < faucetFields.length; i++) {
+faucetFields[i].style.display = 'none';
+}
+}
+});
+</script>
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const toggle_btn = document.getElementById('toggle-btn');
+
+  toggle_btn.onclick = function() {
+    sidebar.classList.toggle('hide');
+
+  }
+</script>
   </body>
 </html>

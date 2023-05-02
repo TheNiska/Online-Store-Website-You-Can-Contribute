@@ -1,0 +1,147 @@
+.squares-wrapper {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 3rem 80px;
+    font-family: 'Raleway', sans-serif;
+    margin-left: 100px;
+}
+
+.product-square {
+    position: relative;
+    width: 460px;
+    height: 460px;
+    border-radius: 5%;
+    box-shadow: 4px 4px 25px -2px rgb(0 0 0 / 30%);
+    background-color: #fff;
+}
+
+
+.info-wrapper {
+    position: absolute;
+    padding: 0 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 204px;
+}
+
+.controls {
+    padding: 1.6em 1em;
+    height: 10%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+}
+.controls .icon-button {
+    font-size: 1.5em;
+    color: #666;
+}
+.controls .icon-button:hover {
+    color: red;
+    cursor: pointer;
+    font-size: 1.6em;
+}
+
+
+
+.product-square .img-wrapper {
+    width: 100%;
+    height: 100%;
+    background-color: #9be010;
+    background-color: #0c1f2c;
+    border-radius: 15px;
+    background: #fff;
+    position: relative;
+}
+
+.img-section {
+    width: 230px;
+    height: 330px;
+    position: absolute;
+    left: -50px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 10px;
+    box-shadow: 4px 4px 25px -2px rgb(0 0 0 / 30%);
+}
+
+.img-wrapper .only-img {
+    height: 80%;
+    width: 95%;
+    margin: 0 auto;
+}
+
+.img-wrapper .quantity {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    font-weight: 500;
+    font-size: 1.4em;
+    color: #225;
+}
+.img-wrapper .quantity::after {
+    content: ' шт';
+    font-size: 0.8em;
+}
+.only-img img {
+    object-fit: contain;
+    height: 100%;
+    width: 100%;
+}
+.product-name h1 {
+    margin-bottom: 0.1em;
+    color: #4c4c4c;
+    font-size: 1.6em;
+    font-weight: 700;
+    text-transform: capitalize;
+    text-align: left;
+    margin: 0;
+    padding: 0;
+}
+
+.product-name span {
+    font-size: 0.8em;
+    color: #a6a6a6;
+}
+
+.product-price {
+    margin: 1.5em 0;
+    color: #ff3f40;
+    font-size: 1.2em;
+}
+
+.product-price span {
+    font-size: 2.9em;
+}
+
+.product-descr {
+    font-size: 0.8em;
+}
+
+.faucet-type, .color, .faucet-filter, .material{
+    text-transform: capitalize;
+}
+
+.faucet-type::before {
+    content:'Тип: ';
+    font-weight: 600;
+}
+.color::before {
+    content: 'Цвет: ';
+    font-weight: 600;
+}
+.faucet-filter::before {
+    content: 'Под фильтр: ';
+    font-weight: 600;
+}
+.material::before {
+    content: 'Материал: ';
+    font-weight: 600;
+}
+
+.descr {
+    font-style: italic;
+    margin-top: 1em;
+    color: #222;
+}

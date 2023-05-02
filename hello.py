@@ -47,7 +47,13 @@ def inject_data():
     for manufacturer in manufacturers:
         manufacturers_set.add(manufacturer.name)
 
-    return dict(categories=categories, manufacturers_set=manufacturers_set)
+    if 'liked_products' in request.cookies:
+        liked_products = request.cookies.get('liked_products')
+        liked_products_list = liked_products.split(',')
+    else:
+        liked_products_list = []
+
+    return dict(categories=categories, manufacturers_set=manufacturers_set, liked_products=liked_products_list)
 
 
 #----------функции для скачивания таблицы-----------------
@@ -140,26 +146,45 @@ def search():
     if form_id == "extended-search":
         category_id = request.form["category"]
         manufacturer_name = request.form["manufacturer"]
-        name_term = request.form["name_term"].lower()
-        descr_term = request.form["descr_term"].lower()
+        name_term = request.form["name_term"].lower().strip()
+        descr_term = request.form["descr_term"].lower().strip()
 
-        products = Product.query.join(Manufacturer).join(Category).\
+        if category_id == "5":
+            fct_type = request.form["fct_type"]
+            color = request.form["color"].lower().strip()
+
+            products = Product.query.join(Manufacturer).join(Category).\
                    filter(or_(Category.id == category_id, not category_id)).\
                    filter(or_(Manufacturer.name == manufacturer_name, not manufacturer_name)).\
-                   filter(and_(Product.quantity > 0,
+                   filter(and_(Product.fct_type.like(f'%{fct_type}%'), 
+                               Product.color.like(f'%{color}%'),
                                or_(Product.name.like(f'%{name_term}%'), Product.sku.like(f'%{name_term}%')),
                                Product.description.like(f'%{descr_term}%'))).all()
+        else:
+            print("Поиск всех продуктов")
+            products = Product.query.join(Manufacturer).join(Category).\
+                       filter(or_(Category.id == category_id, not category_id)).\
+                       filter(or_(Manufacturer.name == manufacturer_name, not manufacturer_name)).\
+                       filter(or_(Product.name.like(f'%{name_term}%'), Product.sku.like(f'%{name_term}%')),
+                                   Product.description.like(f'%{descr_term}%')).all()
+
         search_term = name_term + " " + descr_term
         results = products
 
-    return render_template('search_results.html', results=results, search_term=search_term)
+    return render_template('search_results_squares.html', results=results, search_term=search_term, int=int)
 
 
 @application.route('/products/<int:manufacturer_id>/<string:category_name>')
 def products(manufacturer_id, category_name):
+    table = request.args.get('table')
     manufacturer = Manufacturer.query.get(manufacturer_id)
-    products = Product.query.filter_by(manufacturer_id=manufacturer_id).filter(Product.quantity > 0).all()
-    return render_template('products.html', manufacturer=manufacturer, products=products, category_name=category_name)
+    products = Product.query.filter_by(manufacturer_id=manufacturer_id).all()
+    if table == "True":
+        return render_template('products.html', manufacturer=manufacturer,
+                                products=products, category_name=category_name)
+    else:
+        return render_template('products_squares.html', manufacturer=manufacturer,
+                                products=products, category_name=category_name, int=int)
 
 @application.route('/edit_product/<int:product_id>', methods=['GET', 'POST'])
 def edit_product(product_id):
@@ -170,6 +195,8 @@ def edit_product(product_id):
         old_price = float(request.form['old_price'])
         product.name = request.form['name'].lower().strip()
         product.sku = request.form['sku'].lower().strip()
+        product.material = request.form['material'].lower().strip()
+        product.color = request.form['color'].lower().strip()
         product.description = request.form['description'].lower().strip()
         product.price = float(request.form['price'])
         if product.price != old_price:
@@ -252,12 +279,6 @@ def manufacturers(category_id):
     return render_template('manufacturers.html', manufacturers=manufacturers, category=category)
 
 
-@application.route('/dates/<int:product_id>', methods=['GET'])
-def dates(product_id):
-    product = Product.query.get(product_id)
-    sales_dates = ProductSaleDate.query.filter_by(product_id=product_id).all()
-    return render_template('sold_dates.html', sales_dates=sales_dates, product=product, len=len)
-
 @application.route('/add_manufacturer/<int:category_id>', methods=['POST'])
 def add_manufacturer(category_id):
     name = request.form['name']
@@ -269,83 +290,26 @@ def add_manufacturer(category_id):
     return redirect(url_for('manufacturers', category_id=category_id))
 
 
-@application.route('/amount_change', methods=['GET', 'POST'])
-def amount_change():
-    message = ""
+@application.route('/like/<int:product_id>', methods=['POST'])
+def like(product_id):
+    response = ''
+    if 'liked_products' in request.cookies:
+        liked_products = request.cookies.get('liked_products')
+        liked_products_list = liked_products.split(',')
+        if str(product_id) in liked_products_list:
+            liked_products_list.remove(str(product_id))
+            response = 'removed'
+        else:
+            liked_products_list.append(str(product_id))
+            response = 'added'
+        liked_products = ','.join(liked_products_list)
+    else:
+        liked_products = str(product_id)
+        response = 'added'
 
-    if request.method == 'POST':
-        form_id = request.form.get("form_id")
-
-        if form_id == "search_form":
-            sku = request.form['sku']
-            # ищем товар в базе данных
-            product = Product.query.filter_by(sku=sku).first()
-            if product:
-                return render_template('amount.html', product=product)
-            else:
-                message = "Такого продукта нет"
-                return render_template('amount.html', message=message)
-
-        elif form_id == "change_form":
-            sku = request.form['sku']
-            product = Product.query.filter_by(sku=sku).first()
-            if product:
-                product.quantity = request.form['quantity']
-                db.session.commit()
-                message = "Количество товара успешно изменено"
-                return render_template('amount.html', message=message)
-            else:
-                message = "Ошибка: товар не найден по артикулу"
-                return render_template('amount.html', message=message)
-
-    return render_template('amount.html', message=message)
-
-@application.route('/history', methods=['GET'])
-def history():
-
-        # Определяем начало периода (за последние 31 дней)
-    start_date = datetime.now() - timedelta(days=31)
-
-    # Запрос на получение данных
-    sales_data = db.session.query(
-            Product.name,
-            Product.sku,
-            Product.price,
-            ProductSaleDate.sale_date,
-            db.func.sum(Product.price).label('daily_sales')
-        ).join(
-            ProductSaleDate,
-            Product.id == ProductSaleDate.product_id
-        ).filter(
-            ProductSaleDate.sale_date >= start_date
-        ).group_by(
-            Product.name,
-            Product.sku,
-            Product.price,
-            ProductSaleDate.sale_date,
-            ProductSaleDate.id
-        ).order_by(
-            ProductSaleDate.sale_date
-        ).all()
-
-    # Преобразуем данные для использования в Chart.js
-    data_dict = {}
-    for el in sales_data:
-        date_str = el[3].strftime('%d-%m-%y')
-        if date_str not in data_dict:
-            data_dict[date_str] = {"sales": 0, "products": []}
-        data_dict[date_str]["sales"] += el[2]
-        data_dict[date_str]["products"].append({"name": el[0], "price": el[2], "sku": el[1]})
-
-    chart_labels = []
-    chart_data = []
-    chart_products = []
-    for date, data in data_dict.items():
-        chart_labels.append(date)
-        chart_data.append(data["sales"])
-        chart_products.append(data["products"])
-
-    return render_template('salesHistory.html', labels=chart_labels, data=chart_data, products=chart_products, len=len)
+    resp = make_response(jsonify({'result': response, 'liked_products': liked_products}))
+    resp.set_cookie('liked_products', liked_products)
+    return resp
 
 
 @application.before_first_request

@@ -1,6 +1,7 @@
-
 :root {
-  --background-color: #E5EDF1;
+  --background-color: #E9F1FA;
+  --background-color: #01e37f;
+  --background-color: #FAF5E9;
   --grey-blue: #96C2DB;
   --text-default: #000;
   --table-head-bg: #009879;
@@ -10,30 +11,51 @@
   --table-elem-hover: #733;
   --button-bg: #111;
   --button-text: #f2f2f2;
-  --header-bg: #333333;
+  --header-bg: #009B4D;
   --header-text: #fff;
+  --t-yellow: #FFCC00;
+  --sidebar-width: 75px;
 }
 
-
-body {
-  background-color: var(--background-color);
-  font-family: Arial, sans-serif;
-  color: var(--text-default);
-  margin: 0px;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+/* scrollbar section start */
+  
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    border-width: 1px 1px 1px 2px;
+    border-color: #777;
+    border-radius: 5px;
+    background-color: #004e9b;
+  } 
 
-h1, h2 {
-  color: var(--text-default);
-}
-
-th {
-  background-color: var(--table-head-bg);
-  color: var(--table-head-text);
-}
+  ::-webkit-scrollbar-thumb:hover {
+    border-width: 1px 1px 1px 2px;
+    border-color: #555;
+    background-color: #115eab;
+  }
+  
+  ::-webkit-scrollbar-track {
+    border-width: 0;
+    background-color: #96C2DB;
+  }
+  
+  ::-webkit-scrollbar-track:hover {
+    border-left: solid 1px #7af;
+    background-color: #a6d2fa;
+  }
+  
+/* scrollbar section end */
 
 footer, header {
-  background-color: var(--header-bg);
+  background: var(--header-bg);
 }
 
 footer a {
@@ -50,26 +72,84 @@ td {
 
 
 html, body {
-height: 100%;
+  height: 100%;
 }
 
 body {
-display: flex;
-flex-direction: column;
-min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--background-color);
+  font-family: Arial, sans-serif;
+  color: var(--text-default);
+  position: relative;
+}
+
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 270px;
+  height: 100%;
+  min-height: 350px;
+  color: white;
+  background-color: var(--header-bg);
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 10px;
+  transition: ease-in 0.3s;
+  z-index: 1;
+}
+
+#sidebar.hide {
+  width: 0;
+}
+#toggle-btn {
+  position: absolute;
+  background-color: var(--header-bg);
+  color: #fff;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 120px;
+  right: -39px;
+  width: 40px;
+  height: 40px;
+  font-size: 2rem;
+  border-radius: 0 7px 7px 0;
+  border: none;
+  cursor: pointer;
+  transition: linear 0.2s
 }
 
 .container {
   flex: 1;
-  background-color: var(--background-color);
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  border-radius: 20px;
   padding: 1em;
 }
 
+.container h1, .container h2 {
+  color: #006B1D;
+}
+.container > h2 {
+  margin-bottom: 1em;
+}
+
 header {
-  padding: 10px;
+  padding: 1em;
+  background: var(--header-bg);
+}
+.contacts {
+  float: right;
 }
 
 footer {
@@ -137,11 +217,14 @@ margin-top: auto;
 
 /* nav-bar styles */
 nav {
-display: flex;
-justify-content: space-between;
-align-items: center;
-max-width: 1200px;
-margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Ubuntu', sans-serif;
+  color: #fff;
+
 }
 
 nav ul {
@@ -151,38 +234,52 @@ nav ul {
 }
 
 nav li {
-display: inline-block;
+  display: inline-block;
+  padding: 0.3em 1em;
+  padding-bottom: 1em;
+}
+nav li:first-of-type {
+  padding-left: 0;
+}
+
+nav .contacts p {
+  padding: 0.3em;
+}
+nav .contacts p span {
+  padding-left: 1em;
 }
 
 nav a {
-display: block;
-padding: 10px;
-text-decoration: none;
-color: var(--header-text);
-}
+  display: block;
+  padding-bottom: 0.3em;
+  padding-left: 0.5em;
+  text-decoration: none;
+  color: var(--header-text);
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9em;
 
+}
+nav a::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: lightblue;
+  margin: 0 20%;
+}
 nav a:hover {
-  text-decoration: underline;
+  color: lightblue;
+}
+nav a:hover::after {
+    width: 60%;
+    transition: 0.7s;
 }
  /*-----------------------------*/
  
-
-.search-box {
-  display: flex;
-  align-items: center;
-}
-
-.search-form {
-display: flex;
-align-items: center;
-}
-
-.search-form input[type="text"] {
-  border: none;
-  border-radius: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
-}
 
 .nav-icon {
   color: var(--header-text);
@@ -268,6 +365,8 @@ th, td {
 th {
   padding-top: 1em;
   padding-bottom: 1em;
+  background-color: var(--table-head-bg);
+  color: var(--table-head-text);
 }
 form {
   display: inline-block;
@@ -316,22 +415,6 @@ th::after {
 a {
   color: #007bff;
   text-decoration: none;
-}
-
-button, .btn {
-  background-color: var(--button-bg);
-  border: none;
-  border-radius: 1em;
-  color: var(--button-text);
-  cursor: pointer;
-  padding: 10px;
-}
-
-
-
-button:hover, .btn:hover {
-  background-color: #444;
-  color: #000;
 }
 
 
@@ -416,10 +499,16 @@ header .icon-button:hover{
 }
 
 
-table button.icon-button {
+/* ----------- Стиль кнопки-иконки ----------- */
+.icon-button {
   padding: 0;
   background-color: transparent;
+  border: none;
 }
+.icon-button:hover {
+  background-color: inherit;
+}
+/* ----------- Конец стиля кнопки-иконки ----------- */
 
 
 .edit-product-form {

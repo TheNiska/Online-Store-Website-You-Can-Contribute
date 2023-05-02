@@ -10,9 +10,14 @@
     <h2>Категория: {{ category.name }}</h2>
     <ul class="manufacturers">
       {% for manufacturer in manufacturers %}
-        <a href="{{ url_for('products', manufacturer_id=manufacturer.id, category_name=category.name_eng) }}">
-          <li>{{ manufacturer.name }}</li>
-        </a>
+          <li>{{ manufacturer.name }}
+            <a href="{{ url_for('products', manufacturer_id=manufacturer.id, category_name=category.name_eng, table=True) }}">
+              <i class="table-icon fa-solid fa-table-list"></i>
+            </a>
+            <a href="{{ url_for('products', manufacturer_id=manufacturer.id, category_name=category.name_eng, table=False) }}">
+              <i class="table-icon fa-solid fa-square"></i>
+            </a>
+          </li>
 
       {% endfor %}
     </ul>

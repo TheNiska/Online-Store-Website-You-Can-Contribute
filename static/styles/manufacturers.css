@@ -14,13 +14,8 @@
     text-decoration: none;
     padding: 0.7em;
     border: 1px solid transparent;
-    transition: .5s;
 }
 
-.manufacturers li:hover {
-    border-color: var(--header-color);
-    border-radius: 100px;
-}
 
 
 .manufacturers-form form > * {

@@ -25,6 +25,7 @@ class Product(db.Model):
     color = db.Column(db.String(50), nullable=True)
     fct_type = db.Column(db.String(20), nullable=True)
     fct_fltr = db.Column(db.Boolean, nullable=True)
+    material = db.Column(db.String(40), nullable=True)
     manufacturer_id = db.Column(db.Integer, db.ForeignKey('manufacturer.id', ondelete='CASCADE'), nullable=False)
 
 class ProductSaleDate(db.Model):
