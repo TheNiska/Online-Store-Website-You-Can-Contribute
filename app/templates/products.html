@@ -3,26 +3,26 @@
 {% block title %} {{manufacturer.name }} {% endblock %}
 
 {% block content %}
-     <h1>Товары ({{ products|length }} шт)</h1>
-     <h2 id="titl">Производитель: {{ manufacturer.name }}<button id="download-csv"><i class="fas fa-download"></i></button></h2>
-     <h4><a href="#add_form">К концу страницы</a></h4>
+     <h1>The number of the products is {{ products|length }}</h1>
+     <h2 id="titl">Manufacturer: {{ manufacturer.name }}<button id="download-csv"><i class="fas fa-download"></i></button></h2>
+     <h4><a href="#add_form">To the end of the page</a></h4>
      <div id="image-container">
      </div>
     <table class="products_table">
     <thead>
       <tr>
-        <th data-type="string">Название</th>
-        <th data-type="string">Артикул</th>
-        <th data-type="string">Описание</th>
+        <th data-type="string">Name</th>
+        <th data-type="string">Sku</th>
+        <th data-type="string">Description</th>
         {% if category_name == "mixers" %}
-        <th>Тип</th>
-        <th>Цвет</th>
-        <th>С фильтром</th>
+        <th>Type</th>
+        <th>Color</th>
+        <th>isWithFilter</th>
         {% endif %}
-        <th data-type="number">Цена</th>
-        <th>Количество</th>
-        <th>Дата цены</th>
-        <th>Действия</th>
+        <th data-type="number">Price</th>
+        <th>Quantity</th>
+        <th>Price date</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -84,20 +84,20 @@
     </table>
 
     <form id="add_form" method="POST" action="/add_product/{{ manufacturer.id }}">
-      <label for="name">Название:</label>
+      <label for="name">Name:</label>
       <input type="text" name="name" required>
       <br>
-      <label for="sku">Артикул:</label>
+      <label for="sku">Sku:</label>
       <input type="text" name="sku">
       <br>
-      <label for="description">Описание:</label>
+      <label for="description">Description:</label>
       <input type="text" name="description">
       <br>
       {% if category_name == "mixers" %}
       <label for="color">Цвет</label>
       <input type="text" name="color">
       <br>
-      <label for="fct_type">Тип</label>
+      <label for="fct_type">Type</label>
       <select name="fct_type">
         <option value="для умывальника">Для умывальника</option>
         <option value="для кухни">Для кухни</option>

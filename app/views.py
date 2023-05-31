@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from app import application
+from app import application, db
 from app.models import Category, Manufacturer, Product, ProductSaleDate
 from flask import (Flask, render_template, request, redirect, url_for, flash,
                    make_response, current_app, jsonify)
@@ -206,6 +206,7 @@ def delete_product(product_id):
     db.session.delete(product)
     db.session.commit()
     return jsonify({'success': True})
+
 
 @application.route('/update_quantity/<int:product_id>', methods=['POST'])
 def update_quantity(product_id):
